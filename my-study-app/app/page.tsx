@@ -68,8 +68,37 @@ const LS_COMPLETED_LESSONS_KEY = 'ham_technician_completed_lessons';
 const LS_SPACED_REP_KEY = 'ham_technician_spaced_rep';
 const LS_DARK_MODE_KEY = 'ham_technician_dark_mode';
 const LS_STREAK_KEY = 'ham_technician_streak';
+const LS_ONBOARDING_KEY = 'ham_technician_onboarding_complete';
 
-const APP_VERSION = '1.2.0';
+// Onboarding slide data
+const ONBOARDING_SLIDES = [
+  {
+    icon: '📻',
+    title: 'Welcome to Study Buddy!',
+    description: 'Your complete study guide for the FCC Technician Class license exam. Let\'s get you on the air!',
+    highlight: 'Pass the 35-question exam with 74% to earn your license',
+  },
+  {
+    icon: '📚',
+    title: 'Learn, Then Practice',
+    description: 'Start with the Learn section to study each topic, then test yourself with Study Mode or Practice Exams.',
+    highlight: '10 lessons covering all exam topics',
+  },
+  {
+    icon: '🔄',
+    title: 'Smart Review System',
+    description: 'Questions you miss come back automatically through spaced repetition. Get them right 3 times to master them.',
+    highlight: 'Bookmark tricky questions for extra practice',
+  },
+  {
+    icon: '🏆',
+    title: 'Track Your Progress',
+    description: 'Build study streaks, earn badges, and watch your weak areas improve. You\'ve got this!',
+    highlight: 'Study daily to maintain your streak',
+  },
+];
+
+const APP_VERSION = '1.3.0';
 
 // Streak data structure
 interface StreakData {
@@ -176,6 +205,10 @@ export default function Home() {
   // Settings confirmation dialog
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingSlide, setOnboardingSlide] = useState(0);
+
   // ---------- LOCALSTORAGE LOAD ----------
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -231,6 +264,16 @@ export default function Home() {
         const parsed = JSON.parse(savedStreak);
         setStreakData(parsed.streakData || { currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
         setPassedExams(parsed.passedExams || 0);
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    // Check if onboarding has been completed
+    try {
+      const onboardingComplete = window.localStorage.getItem(LS_ONBOARDING_KEY);
+      if (!onboardingComplete) {
+        setShowOnboarding(true);
       }
     } catch {
       // ignore parse errors
@@ -383,6 +426,15 @@ export default function Home() {
       }
       return next;
     });
+  };
+
+  // Complete onboarding and persist
+  const completeOnboarding = () => {
+    setShowOnboarding(false);
+    setOnboardingSlide(0);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LS_ONBOARDING_KEY, 'true');
+    }
   };
 
   // Reset all progress (stats, bookmarks, spaced rep, completed lessons, streaks)
@@ -807,8 +859,8 @@ export default function Home() {
     return (
       <main className={`min-h-screen flex flex-col items-center justify-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
         <div className={`max-w-md w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-10 rounded-2xl shadow-xl text-center`}>
-          <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Technician Class</h1>
-          <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-4`}>Amateur Radio License Prep</p>
+          <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Ham Radio Study Buddy</h1>
+          <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-4`}>Technician Class Prep</p>
 
           {/* Streak Display */}
           {streakData.totalStudyDays > 0 && (
@@ -970,6 +1022,76 @@ export default function Home() {
             </p>
           )}
         </div>
+
+        {/* Onboarding Modal */}
+        {showOnboarding && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+            <div className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden`}>
+              {/* Slide Content */}
+              <div className="p-8 text-center">
+                <span className="text-6xl mb-4 block">{ONBOARDING_SLIDES[onboardingSlide].icon}</span>
+                <h2 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+                  {ONBOARDING_SLIDES[onboardingSlide].title}
+                </h2>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-4`}>
+                  {ONBOARDING_SLIDES[onboardingSlide].description}
+                </p>
+                <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${darkMode ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-50 text-blue-700'}`}>
+                  💡 {ONBOARDING_SLIDES[onboardingSlide].highlight}
+                </div>
+              </div>
+
+              {/* Progress Dots */}
+              <div className="flex justify-center gap-2 pb-4">
+                {ONBOARDING_SLIDES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setOnboardingSlide(idx)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      idx === onboardingSlide
+                        ? 'bg-blue-600 w-6'
+                        : darkMode ? 'bg-slate-600' : 'bg-slate-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className={`flex gap-3 p-4 ${darkMode ? 'bg-slate-700' : 'bg-slate-50'}`}>
+                {onboardingSlide > 0 ? (
+                  <button
+                    onClick={() => setOnboardingSlide((prev) => prev - 1)}
+                    className={`flex-1 py-3 rounded-xl font-semibold ${darkMode ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'}`}
+                  >
+                    Back
+                  </button>
+                ) : (
+                  <button
+                    onClick={completeOnboarding}
+                    className={`flex-1 py-3 rounded-xl font-semibold ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Skip
+                  </button>
+                )}
+                {onboardingSlide < ONBOARDING_SLIDES.length - 1 ? (
+                  <button
+                    onClick={() => setOnboardingSlide((prev) => prev + 1)}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    onClick={completeOnboarding}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold"
+                  >
+                    Get Started! 🚀
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     );
   }
@@ -1271,7 +1393,7 @@ export default function Home() {
               About
             </h3>
             <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-slate-50'}`}>
-              <p className="font-bold text-lg mb-1">Ham Radio Technician Prep</p>
+              <p className="font-bold text-lg mb-1">Ham Radio Study Buddy</p>
               <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-3`}>Version {APP_VERSION}</p>
               <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} space-y-2`}>
                 <p>
@@ -1281,6 +1403,16 @@ export default function Home() {
                   This app is not affiliated with the FCC or ARRL. Use for educational purposes only.
                 </p>
               </div>
+              <button
+                onClick={() => {
+                  setShowOnboarding(true);
+                  setOnboardingSlide(0);
+                  setAppState('menu');
+                }}
+                className={`mt-3 w-full py-2 rounded-lg text-sm font-medium ${darkMode ? 'bg-slate-600 hover:bg-slate-500 text-slate-300' : 'bg-slate-200 hover:bg-slate-300 text-slate-600'}`}
+              >
+                📖 Replay Tutorial
+              </button>
             </div>
           </div>
 

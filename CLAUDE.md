@@ -161,7 +161,7 @@ Questions and lessons are organized by FCC subelements (T0-T9):
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `my-study-app/app/page.tsx` | Main app logic (~1900 lines, all UI + state) |
+| `my-study-app/app/page.tsx` | Main app logic (~2030 lines, all UI + state) |
 | `my-study-app/app/ham_radio_questions.json` | 411 parsed questions |
 | `my-study-app/app/lessons.json` | 10 detailed topic lessons |
 | `generate_complete_json.py` | Primary question parser |
@@ -184,6 +184,7 @@ The app uses a state machine pattern with these states:
 - `ham_technician_spaced_rep` - Spaced repetition data per question
 - `ham_technician_dark_mode` - Dark mode preference (boolean)
 - `ham_technician_streak` - Study streak and passed exams data
+- `ham_technician_onboarding_complete` - Whether user has seen onboarding
 
 ## Spaced Repetition Algorithm
 Simple system based on correct answer streaks:
@@ -201,7 +202,20 @@ The app includes a Settings page with:
 - **Export/Import** - Backup and restore all progress as JSON file
 - **Achievements Gallery** - Grid display of all 15 badges with earned/locked status
 - **Reset All Progress** - Clears all data with confirmation dialog
-- **About Section** - Version number, FCC attribution, disclaimer
+- **About Section** - Version number, FCC attribution, disclaimer, replay tutorial button
+
+## Onboarding Tutorial
+First-time users see a 4-slide swipe-through tutorial:
+1. **Welcome** - Introduction and exam overview
+2. **Learn, Then Practice** - Explains the study workflow
+3. **Smart Review System** - Describes spaced repetition
+4. **Track Your Progress** - Highlights streaks and badges
+
+Features:
+- Shown automatically on first launch
+- Skip button available on first slide
+- Progress dots for navigation
+- "Replay Tutorial" button in Settings > About
 
 ## Study Streaks & Badges
 Gamification features to encourage daily study:
@@ -231,7 +245,7 @@ All pages support dark mode:
 - All UI elements styled for both modes
 
 ## Current Limitations
-- **Monolithic architecture:** All ~1900 lines in single `page.tsx`
+- **Monolithic architecture:** All ~2030 lines in single `page.tsx`
 - **No tests:** Zero test coverage
 - **No component library:** Everything is inline Tailwind
 - **Client-side only:** No server components or API routes

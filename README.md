@@ -4,6 +4,7 @@ A modern web application to help you prepare for the FCC Amateur Radio Technicia
 
 ## Features
 
+- **👋 Onboarding Tutorial** - First-time user walkthrough explaining app features
 - **📚 Learn Mode** - Study 10 topic-based lessons before testing yourself
 - **📖 Study Mode** - Practice all 411 questions with immediate feedback and explanations
 - **📝 Practice Exam** - Simulate the real exam with 35 random questions and pass/fail scoring
@@ -186,7 +187,7 @@ ham-radio-app/
 - **Export/Import** - Backup your progress to a JSON file or restore from a previous backup
 - **Achievements Gallery** - View all 15 badges with earned/locked status
 - **Reset All Progress** - Clear all data and start fresh (with confirmation)
-- **About** - Version info and FCC attribution
+- **About** - Version info, FCC attribution, and replay tutorial option
 
 ### Study Streaks & Badges
 The app includes gamification features to encourage daily studying:
