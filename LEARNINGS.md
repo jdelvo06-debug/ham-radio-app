@@ -58,6 +58,7 @@ useEffect(() => {
 - Bookmarks: Saved immediately on toggle
 - Stats: Saved after each question answered
 - Completed Lessons: Saved immediately on "Mark Complete"
+- Dark Mode: Saved immediately on toggle
 - No debouncing needed (low frequency operations)
 
 ### Storage Keys
@@ -66,6 +67,7 @@ const LS_BOOKMARKS_KEY = 'ham_technician_bookmarks';
 const LS_GLOBAL_STATS_KEY = 'ham_technician_global_stats';
 const LS_COMPLETED_LESSONS_KEY = 'ham_technician_completed_lessons';
 const LS_SPACED_REP_KEY = 'ham_technician_spaced_rep';
+const LS_DARK_MODE_KEY = 'ham_technician_dark_mode';
 ```
 
 ## Data Model
@@ -146,6 +148,64 @@ Spaced repetition data is updated in:
 - **Quiz view:** Shows mastery progress in explanation panel during review mode
 - **Results screen:** Shows review-specific stats (mastered count, remaining reviews)
 
+## Settings Page Implementation
+
+### Dark Mode
+- State: `const [darkMode, setDarkMode] = useState(false);`
+- Toggle function saves to localStorage immediately
+- Applied via conditional Tailwind classes throughout all pages
+- Dark palette uses `slate-900` backgrounds, `slate-800` cards, appropriate text colors
+
+### Dark Mode Pattern
+```typescript
+// Background and text
+className={`${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}
+
+// Cards and containers
+className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}
+
+// Secondary text
+className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
+```
+
+### Reset Progress
+- Clears all 4 localStorage keys (stats, bookmarks, lessons, spaced rep)
+- Resets all related state to empty/default values
+- Protected by confirmation modal to prevent accidents
+
+### App Version
+- Stored as constant: `const APP_VERSION = '1.1.0';`
+- Displayed in Settings About section
+
+## Data Export/Import
+
+### Export Format
+```typescript
+{
+  version: string;           // APP_VERSION
+  exportedAt: string;        // ISO timestamp
+  data: {
+    globalStats: Record<string, GlobalSubelementStats>;
+    bookmarks: string[];
+    completedLessons: string[];
+    spacedRepData: Record<string, SpacedRepData>;
+    darkMode: boolean;
+  }
+}
+```
+
+### Export Implementation
+- Creates Blob with JSON content
+- Triggers download via temporary anchor element
+- Filename: `ham-radio-progress-YYYY-MM-DD.json`
+
+### Import Implementation
+- Uses hidden file input with `.json` accept filter
+- FileReader API to read content
+- Validates `data` object exists before importing
+- Updates both state and localStorage for each data type
+- Shows alert on success/failure
+
 ## Parser Quirks
 
 ### Question ID Format
@@ -171,6 +231,24 @@ Configured in `package.json`:
 "dev": "next dev -p 3005"
 ```
 
+## Weak Areas Analysis
+
+### Algorithm
+The Analytics page categorizes topics into three groups:
+- **Weak Areas:** `total >= 5 && pct < 74` - sorted by accuracy ascending
+- **Strong Areas:** `total >= 5 && pct >= 74` - sorted by accuracy descending
+- **Needs More Data:** `total < 5` - insufficient questions to judge
+
+### Threshold Rationale
+- 74% is the FCC passing threshold
+- 5 questions minimum avoids noisy data (1/2 = 50% isn't meaningful)
+- Topics are linked to lesson titles for context
+
+### UI Pattern
+Each weak area has a "Study" button that:
+1. Sets `selectedSubelement` to that topic
+2. Calls `startQuiz('study')` to begin practice
+
 ## Known Bugs & Tech Debt
 
 ### Current Issues
@@ -184,8 +262,7 @@ Configured in `package.json`:
 2. Extract reusable components (QuestionCard, ProgressBar, LessonCard, etc.)
 3. Consider Zustand if state gets more complex
 4. Add keyboard navigation for accessibility
-5. Previous/Next navigation between lessons
-6. Flashcard mode for key facts
+5. Flashcard mode for key facts
 
 ## Build & Deploy
 

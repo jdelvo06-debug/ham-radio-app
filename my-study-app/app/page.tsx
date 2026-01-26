@@ -59,13 +59,43 @@ interface SpacedRepData {
   timesCorrect: number;       // total times correct
 }
 
-type AppState = 'menu' | 'quiz' | 'results' | 'analytics' | 'learn' | 'lesson';
+type AppState = 'menu' | 'quiz' | 'results' | 'analytics' | 'learn' | 'lesson' | 'settings';
 type Mode = 'study' | 'exam' | 'bookmarks' | 'review';
 
 const LS_BOOKMARKS_KEY = 'ham_technician_bookmarks';
 const LS_GLOBAL_STATS_KEY = 'ham_technician_global_stats';
 const LS_COMPLETED_LESSONS_KEY = 'ham_technician_completed_lessons';
 const LS_SPACED_REP_KEY = 'ham_technician_spaced_rep';
+const LS_DARK_MODE_KEY = 'ham_technician_dark_mode';
+const LS_STREAK_KEY = 'ham_technician_streak';
+
+const APP_VERSION = '1.2.0';
+
+// Streak data structure
+interface StreakData {
+  currentStreak: number;      // Current consecutive days
+  longestStreak: number;      // Best streak ever
+  lastStudyDate: string;      // YYYY-MM-DD format
+  totalStudyDays: number;     // Total days studied
+}
+
+// Badge definitions
+interface Badge {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  check: (stats: BadgeCheckParams) => boolean;
+}
+
+interface BadgeCheckParams {
+  totalAnswered: number;
+  totalCorrect: number;
+  streak: StreakData;
+  completedLessons: number;
+  masteredCount: number;
+  passedExams: number;
+}
 
 // Spaced repetition intervals (in milliseconds)
 // Simple system: miss = review soon, correct streak increases interval
@@ -75,6 +105,25 @@ const REVIEW_INTERVALS = {
   2: 24 * 60 * 60 * 1000,  // 1 day after second correct
   3: 7 * 24 * 60 * 60 * 1000, // 7 days after third correct (mastered)
 };
+
+// Badge definitions
+const BADGES: Badge[] = [
+  { id: 'first_question', name: 'First Steps', icon: '🎯', description: 'Answer your first question', check: (p) => p.totalAnswered >= 1 },
+  { id: 'ten_correct', name: 'Getting Started', icon: '✨', description: 'Get 10 questions correct', check: (p) => p.totalCorrect >= 10 },
+  { id: 'fifty_correct', name: 'Dedicated Learner', icon: '📚', description: 'Get 50 questions correct', check: (p) => p.totalCorrect >= 50 },
+  { id: 'hundred_correct', name: 'Century Club', icon: '💯', description: 'Get 100 questions correct', check: (p) => p.totalCorrect >= 100 },
+  { id: 'streak_3', name: 'On a Roll', icon: '🔥', description: 'Study 3 days in a row', check: (p) => p.streak.currentStreak >= 3 },
+  { id: 'streak_7', name: 'Week Warrior', icon: '⚡', description: 'Study 7 days in a row', check: (p) => p.streak.longestStreak >= 7 },
+  { id: 'streak_14', name: 'Two Week Champ', icon: '🏆', description: 'Study 14 days in a row', check: (p) => p.streak.longestStreak >= 14 },
+  { id: 'streak_30', name: 'Monthly Master', icon: '👑', description: 'Study 30 days in a row', check: (p) => p.streak.longestStreak >= 30 },
+  { id: 'first_lesson', name: 'Student', icon: '📖', description: 'Complete your first lesson', check: (p) => p.completedLessons >= 1 },
+  { id: 'all_lessons', name: 'Scholar', icon: '🎓', description: 'Complete all 10 lessons', check: (p) => p.completedLessons >= 10 },
+  { id: 'first_mastered', name: 'Memory Pro', icon: '🧠', description: 'Master your first question', check: (p) => p.masteredCount >= 1 },
+  { id: 'ten_mastered', name: 'Review Expert', icon: '⭐', description: 'Master 10 questions', check: (p) => p.masteredCount >= 10 },
+  { id: 'fifty_mastered', name: 'Knowledge Keeper', icon: '🌟', description: 'Master 50 questions', check: (p) => p.masteredCount >= 50 },
+  { id: 'pass_exam', name: 'Exam Ready', icon: '✅', description: 'Pass a practice exam (74%+)', check: (p) => p.passedExams >= 1 },
+  { id: 'five_exams', name: 'Test Veteran', icon: '🎖️', description: 'Pass 5 practice exams', check: (p) => p.passedExams >= 5 },
+];
 
 export default function Home() {
   // App state
@@ -109,6 +158,23 @@ export default function Home() {
 
   // Spaced repetition data (persisted)
   const [spacedRepData, setSpacedRepData] = useState<Record<string, SpacedRepData>>({});
+
+  // Dark mode (persisted)
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Study streak data (persisted)
+  const [streakData, setStreakData] = useState<StreakData>({
+    currentStreak: 0,
+    longestStreak: 0,
+    lastStudyDate: '',
+    totalStudyDays: 0,
+  });
+
+  // Passed exams count (persisted as part of streak data)
+  const [passedExams, setPassedExams] = useState(0);
+
+  // Settings confirmation dialog
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // ---------- LOCALSTORAGE LOAD ----------
   useEffect(() => {
@@ -145,6 +211,26 @@ export default function Home() {
       const savedSpacedRep = window.localStorage.getItem(LS_SPACED_REP_KEY);
       if (savedSpacedRep) {
         setSpacedRepData(JSON.parse(savedSpacedRep));
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    try {
+      const savedDarkMode = window.localStorage.getItem(LS_DARK_MODE_KEY);
+      if (savedDarkMode) {
+        setDarkMode(JSON.parse(savedDarkMode));
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    try {
+      const savedStreak = window.localStorage.getItem(LS_STREAK_KEY);
+      if (savedStreak) {
+        const parsed = JSON.parse(savedStreak);
+        setStreakData(parsed.streakData || { currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
+        setPassedExams(parsed.passedExams || 0);
       }
     } catch {
       // ignore parse errors
@@ -286,6 +372,202 @@ export default function Home() {
     const shuffled = [...dueQuestions].sort(() => 0.5 - Math.random());
     const limited = shuffled.slice(0, Math.min(20, shuffled.length)); // Max 20 per session
     setActiveQuestions(limited);
+  };
+
+  // Toggle dark mode and persist
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  // Reset all progress (stats, bookmarks, spaced rep, completed lessons, streaks)
+  const resetAllProgress = () => {
+    // Clear state
+    setGlobalStats({});
+    setBookmarks([]);
+    setSpacedRepData({});
+    setCompletedLessons([]);
+    setStreakData({ currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
+    setPassedExams(0);
+
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(LS_GLOBAL_STATS_KEY);
+      window.localStorage.removeItem(LS_BOOKMARKS_KEY);
+      window.localStorage.removeItem(LS_SPACED_REP_KEY);
+      window.localStorage.removeItem(LS_COMPLETED_LESSONS_KEY);
+      window.localStorage.removeItem(LS_STREAK_KEY);
+    }
+
+    setShowResetConfirm(false);
+  };
+
+  // Update study streak (call when user answers a question)
+  const updateStreak = () => {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+    setStreakData((prev) => {
+      // Already studied today
+      if (prev.lastStudyDate === today) {
+        return prev;
+      }
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      let newStreak: StreakData;
+
+      if (prev.lastStudyDate === yesterdayStr) {
+        // Continuing streak
+        const newCurrentStreak = prev.currentStreak + 1;
+        newStreak = {
+          currentStreak: newCurrentStreak,
+          longestStreak: Math.max(prev.longestStreak, newCurrentStreak),
+          lastStudyDate: today,
+          totalStudyDays: prev.totalStudyDays + 1,
+        };
+      } else if (prev.lastStudyDate === '') {
+        // First day ever
+        newStreak = {
+          currentStreak: 1,
+          longestStreak: 1,
+          lastStudyDate: today,
+          totalStudyDays: 1,
+        };
+      } else {
+        // Streak broken, start over
+        newStreak = {
+          currentStreak: 1,
+          longestStreak: prev.longestStreak,
+          lastStudyDate: today,
+          totalStudyDays: prev.totalStudyDays + 1,
+        };
+      }
+
+      // Persist
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData: newStreak, passedExams }));
+      }
+
+      return newStreak;
+    });
+  };
+
+  // Record a passed exam
+  const recordPassedExam = () => {
+    setPassedExams((prev) => {
+      const newCount = prev + 1;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData, passedExams: newCount }));
+      }
+      return newCount;
+    });
+  };
+
+  // Get earned badges
+  const getEarnedBadges = (): Badge[] => {
+    const totalAnswered = Object.values(globalStats).reduce((sum, s) => sum + s.total, 0);
+    const totalCorrect = Object.values(globalStats).reduce((sum, s) => sum + s.correct, 0);
+    const params: BadgeCheckParams = {
+      totalAnswered,
+      totalCorrect,
+      streak: streakData,
+      completedLessons: completedLessons.length,
+      masteredCount: getMasteredCount(),
+      passedExams,
+    };
+    return BADGES.filter(badge => badge.check(params));
+  };
+
+  // Export all progress data as JSON file download
+  const exportProgress = () => {
+    const exportData = {
+      version: APP_VERSION,
+      exportedAt: new Date().toISOString(),
+      data: {
+        globalStats,
+        bookmarks,
+        completedLessons,
+        spacedRepData,
+        darkMode,
+        streakData,
+        passedExams,
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ham-radio-progress-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Import progress data from JSON file
+  const importProgress = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const importData = JSON.parse(content);
+
+        // Validate structure
+        if (!importData.data) {
+          alert('Invalid backup file format.');
+          return;
+        }
+
+        const { data } = importData;
+
+        // Import each data type if present
+        if (data.globalStats) {
+          setGlobalStats(data.globalStats);
+          window.localStorage.setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(data.globalStats));
+        }
+        if (data.bookmarks) {
+          setBookmarks(data.bookmarks);
+          window.localStorage.setItem(LS_BOOKMARKS_KEY, JSON.stringify(data.bookmarks));
+        }
+        if (data.completedLessons) {
+          setCompletedLessons(data.completedLessons);
+          window.localStorage.setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(data.completedLessons));
+        }
+        if (data.spacedRepData) {
+          setSpacedRepData(data.spacedRepData);
+          window.localStorage.setItem(LS_SPACED_REP_KEY, JSON.stringify(data.spacedRepData));
+        }
+        if (typeof data.darkMode === 'boolean') {
+          setDarkMode(data.darkMode);
+          window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(data.darkMode));
+        }
+        if (data.streakData) {
+          setStreakData(data.streakData);
+          const importedPassedExams = data.passedExams || 0;
+          setPassedExams(importedPassedExams);
+          window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData: data.streakData, passedExams: importedPassedExams }));
+        }
+
+        alert('Progress imported successfully!');
+      } catch {
+        alert('Failed to import progress. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset the input so the same file can be selected again
+    event.target.value = '';
   };
 
   // Start quiz for a specific subelement (from lesson view)
@@ -447,6 +729,9 @@ export default function Home() {
 
       // Update spaced repetition data for all modes except exam
       updateSpacedRepetition(currentQ.id, wasCorrect);
+
+      // Update study streak
+      updateStreak();
     }
   };
 
@@ -489,6 +774,9 @@ export default function Home() {
 
       // Update spaced repetition for exam mode too
       updateSpacedRepetition(currentQ.id, wasCorrect);
+
+      // Update study streak for exam mode
+      updateStreak();
     }
 
     const nextIndex = currentQuestionIndex + 1;
@@ -498,6 +786,18 @@ export default function Home() {
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
+      // Check if passed exam (74%+) and record it
+      if (mode === 'exam') {
+        const finalScore = score + (selectedAnswer ? 1 : 0); // Include current answer if correct
+        const currentQ = activeQuestions[currentQuestionIndex];
+        const optionIndex = currentQ.options.indexOf(selectedAnswer || '');
+        const lastCorrect = optionIndex !== -1 && isAnswerCorrect(optionIndex, currentQ.correctAnswer);
+        const adjustedScore = lastCorrect ? finalScore : score;
+        const percentage = Math.round((adjustedScore / activeQuestions.length) * 100);
+        if (percentage >= 74) {
+          recordPassedExam();
+        }
+      }
       setAppState('results');
     }
   };
@@ -505,20 +805,71 @@ export default function Home() {
   // ---------- RENDER: MENU ----------
   if (appState === 'menu') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 text-slate-900">
-        <div className="max-w-md w-full bg-white p-10 rounded-2xl shadow-xl text-center">
+      <main className={`min-h-screen flex flex-col items-center justify-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
+        <div className={`max-w-md w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-10 rounded-2xl shadow-xl text-center`}>
           <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Technician Class</h1>
-          <p className="text-slate-500 mb-8">Amateur Radio License Prep</p>
+          <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-4`}>Amateur Radio License Prep</p>
+
+          {/* Streak Display */}
+          {streakData.totalStudyDays > 0 && (
+            <div className={`mb-6 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200'}`}>
+              <div className="flex items-center justify-center gap-4">
+                <div className="text-center">
+                  <span className="text-2xl">🔥</span>
+                  <p className={`text-lg font-bold ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>{streakData.currentStreak}</p>
+                  <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Day Streak</p>
+                </div>
+                <div className={`w-px h-10 ${darkMode ? 'bg-slate-600' : 'bg-amber-200'}`}></div>
+                <div className="text-center">
+                  <span className="text-2xl">⭐</span>
+                  <p className={`text-lg font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>{streakData.longestStreak}</p>
+                  <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Best Streak</p>
+                </div>
+                <div className={`w-px h-10 ${darkMode ? 'bg-slate-600' : 'bg-amber-200'}`}></div>
+                <div className="text-center">
+                  <span className="text-2xl">📅</span>
+                  <p className={`text-lg font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{streakData.totalStudyDays}</p>
+                  <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Total Days</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Badges Summary */}
+          {getEarnedBadges().length > 0 && (
+            <div className={`mb-6 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  🏆 Achievements
+                </span>
+                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
+                  {getEarnedBadges().length}/{BADGES.length}
+                </span>
+              </div>
+              <div className="flex justify-center gap-1 flex-wrap">
+                {getEarnedBadges().slice(0, 8).map((badge) => (
+                  <span key={badge.id} className="text-xl" title={badge.name}>
+                    {badge.icon}
+                  </span>
+                ))}
+                {getEarnedBadges().length > 8 && (
+                  <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} self-center`}>
+                    +{getEarnedBadges().length - 8}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Subelement filter */}
           <div className="mb-6 text-left">
-            <label className="block text-xs font-semibold text-slate-500 mb-1">
+            <label className={`block text-xs font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-1`}>
               Focus Area (Subelement)
             </label>
             <select
               value={selectedSubelement}
               onChange={(e) => setSelectedSubelement(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'border-slate-600 bg-slate-700 text-white' : 'border-slate-200 bg-slate-50 text-slate-800'}`}
             >
               <option value="ALL">All Subelements</option>
               {subelements.map((sub) => (
@@ -527,7 +878,7 @@ export default function Home() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className={`mt-1 text-[11px] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
               Questions loaded: {questionsData.length} total
             </p>
           </div>
@@ -598,15 +949,23 @@ export default function Home() {
             </button>
           </div>
 
-          <button
-            onClick={() => setAppState('analytics')}
-            className="w-full py-3 mt-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50"
-          >
-            📊 View Analytics
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => setAppState('analytics')}
+              className={`flex-1 py-3 border rounded-lg text-sm font-semibold ${darkMode ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            >
+              📊 Analytics
+            </button>
+            <button
+              onClick={() => setAppState('settings')}
+              className={`flex-1 py-3 border rounded-lg text-sm font-semibold ${darkMode ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            >
+              ⚙️ Settings
+            </button>
+          </div>
 
           {bookmarks.length > 0 && (
-            <p className="mt-2 text-xs text-slate-400">
+            <p className={`mt-2 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
               {bookmarks.length} question{bookmarks.length === 1 ? '' : 's'} bookmarked
             </p>
           )}
@@ -617,39 +976,141 @@ export default function Home() {
 
   // ---------- RENDER: ANALYTICS ----------
   if (appState === 'analytics') {
+    // Get lesson titles for display
+    const getLessonTitle = (sub: string): string => {
+      const lesson = lessons.find(l => l.id === sub);
+      return lesson ? lesson.title : sub;
+    };
+
     const entries = subelements.map((sub) => {
       const stats = globalStats[sub] ?? { correct: 0, total: 0 };
       const pct = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-      return { sub, ...stats, pct };
+      return { sub, ...stats, pct, title: getLessonTitle(sub) };
     });
 
     const overallTotal = entries.reduce((sum, e) => sum + e.total, 0);
     const overallCorrect = entries.reduce((sum, e) => sum + e.correct, 0);
     const overallPct = overallTotal > 0 ? Math.round((overallCorrect / overallTotal) * 100) : 0;
 
+    // Weak areas: topics with data but below 74%, sorted by accuracy (lowest first)
+    const weakAreas = entries
+      .filter(e => e.total >= 5 && e.pct < 74)
+      .sort((a, b) => a.pct - b.pct);
+
+    // Strong areas: topics with data and at or above 74%, sorted by accuracy (highest first)
+    const strongAreas = entries
+      .filter(e => e.total >= 5 && e.pct >= 74)
+      .sort((a, b) => b.pct - a.pct);
+
+    // Topics that need more practice (less than 5 questions answered)
+    const needsMoreData = entries.filter(e => e.total < 5);
+
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 text-slate-900">
-        <div className="max-w-xl w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+      <main className={`min-h-screen flex flex-col items-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
+        <div className={`max-w-xl w-full ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-8 rounded-2xl shadow-xl border`}>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             📊 Analytics
           </h2>
           {overallTotal === 0 ? (
-            <p className="text-sm text-slate-500 mb-6">
+            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-6`}>
               No data yet. Do some Study, Exams, or Bookmark sessions to build analytics.
             </p>
           ) : (
-            <div className="mb-6 text-sm text-slate-700">
-              <p className="font-semibold">
-                Overall: {overallCorrect}/{overallTotal} correct ({overallPct}%)
-              </p>
-              <p className="text-xs text-slate-500">
-                Includes Study, Exam, and Bookmarks sessions (persisted to this browser).
-              </p>
-            </div>
+            <>
+              {/* Overall Stats */}
+              <div className={`mb-6 text-sm ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                <p className="font-semibold">
+                  Overall: {overallCorrect}/{overallTotal} correct ({overallPct}%)
+                </p>
+                <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
+                  Includes Study, Exam, and Bookmarks sessions (persisted to this browser).
+                </p>
+              </div>
+
+              {/* Weak Areas Section */}
+              {weakAreas.length > 0 && (
+                <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border`}>
+                  <h3 className={`text-sm font-bold ${darkMode ? 'text-red-400' : 'text-red-700'} mb-3 flex items-center gap-2`}>
+                    ⚠️ Weak Areas - Focus Here
+                  </h3>
+                  <div className="space-y-2">
+                    {weakAreas.map((e) => (
+                      <div key={e.sub} className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <span className={`font-mono text-xs ${darkMode ? 'text-red-400' : 'text-red-600'} mr-2`}>{e.sub}</span>
+                          <span className={`text-sm ${darkMode ? 'text-red-300' : 'text-red-800'}`}>{e.title}</span>
+                          <span className={`ml-2 text-xs font-bold ${darkMode ? 'text-red-400' : 'text-red-600'}`}>({e.pct}%)</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedSubelement(e.sub);
+                            startQuiz('study');
+                          }}
+                          className={`text-xs px-3 py-1 rounded-full font-semibold ${darkMode ? 'bg-red-800 text-red-200 hover:bg-red-700' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+                        >
+                          Study
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className={`text-xs ${darkMode ? 'text-red-400' : 'text-red-600'} mt-3`}>
+                    These topics are below the 74% passing threshold. Focus your study time here!
+                  </p>
+                </div>
+              )}
+
+              {/* Strong Areas Section */}
+              {strongAreas.length > 0 && (
+                <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'} border`}>
+                  <h3 className={`text-sm font-bold ${darkMode ? 'text-green-400' : 'text-green-700'} mb-3 flex items-center gap-2`}>
+                    ✓ Strong Areas
+                  </h3>
+                  <div className="space-y-1">
+                    {strongAreas.map((e) => (
+                      <div key={e.sub} className="flex items-center">
+                        <span className={`font-mono text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mr-2`}>{e.sub}</span>
+                        <span className={`text-sm ${darkMode ? 'text-green-300' : 'text-green-800'}`}>{e.title}</span>
+                        <span className={`ml-2 text-xs font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>({e.pct}%)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Needs More Data Section */}
+              {needsMoreData.length > 0 && (
+                <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} border`}>
+                  <h3 className={`text-sm font-bold ${darkMode ? 'text-amber-400' : 'text-amber-700'} mb-3 flex items-center gap-2`}>
+                    📝 Need More Practice
+                  </h3>
+                  <p className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-600'} mb-2`}>
+                    Answer at least 5 questions in these topics to get accuracy insights:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {needsMoreData.map((e) => (
+                      <button
+                        key={e.sub}
+                        onClick={() => {
+                          setSelectedSubelement(e.sub);
+                          startQuiz('study');
+                        }}
+                        className={`text-xs px-3 py-1 rounded-full font-semibold ${darkMode ? 'bg-amber-800 text-amber-200 hover:bg-amber-700' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
+                      >
+                        {e.sub} - {e.title} ({e.total}/5)
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          <div className="border border-slate-100 rounded-xl overflow-hidden text-sm">
-            <div className="grid grid-cols-4 bg-slate-50 px-3 py-2 font-semibold text-slate-600">
+          {/* Full Breakdown Table */}
+          <h3 className={`text-sm font-bold ${darkMode ? 'text-slate-400' : 'text-slate-600'} mb-2 mt-4`}>
+            Full Breakdown
+          </h3>
+          <div className={`border ${darkMode ? 'border-slate-700' : 'border-slate-100'} rounded-xl overflow-hidden text-sm`}>
+            <div className={`grid grid-cols-4 ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 text-slate-600'} px-3 py-2 font-semibold`}>
               <span>Sub</span>
               <span className="text-right">Seen</span>
               <span className="text-right">Correct</span>
@@ -658,7 +1119,7 @@ export default function Home() {
             {entries.map((e) => (
               <div
                 key={e.sub}
-                className="grid grid-cols-4 px-3 py-2 border-t border-slate-100 text-slate-700"
+                className={`grid grid-cols-4 px-3 py-2 border-t ${darkMode ? 'border-slate-700 text-slate-300' : 'border-slate-100 text-slate-700'}`}
               >
                 <span className="font-mono">{e.sub}</span>
                 <span className="text-right">{e.total}</span>
@@ -680,11 +1141,182 @@ export default function Home() {
 
           <button
             onClick={() => setAppState('menu')}
-            className="w-full mt-6 py-3 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-bold transition"
+            className={`w-full mt-6 py-3 rounded-lg font-bold transition ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'}`}
           >
             Back to Home
           </button>
         </div>
+      </main>
+    );
+  }
+
+  // ---------- RENDER: SETTINGS ----------
+  if (appState === 'settings') {
+    // Calculate some stats for display
+    const totalAnswered = Object.values(globalStats).reduce((sum, s) => sum + s.total, 0);
+    const totalCorrect = Object.values(globalStats).reduce((sum, s) => sum + s.correct, 0);
+
+    return (
+      <main className={`min-h-screen flex flex-col items-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
+        <div className={`max-w-md w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-8 rounded-2xl shadow-xl border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            ⚙️ Settings
+          </h2>
+
+          {/* Appearance Section */}
+          <div className="mb-6">
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wide mb-3`}>
+              Appearance
+            </h3>
+            <div className={`flex items-center justify-between p-4 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-slate-50'}`}>
+              <div>
+                <p className="font-medium">Dark Mode</p>
+                <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Easier on the eyes at night</p>
+              </div>
+              <button
+                onClick={toggleDarkMode}
+                className={`relative w-14 h-8 rounded-full transition-colors ${darkMode ? 'bg-blue-600' : 'bg-slate-300'}`}
+              >
+                <span
+                  className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${darkMode ? 'translate-x-7' : 'translate-x-1'}`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Data Section */}
+          <div className="mb-6">
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wide mb-3`}>
+              Data & Progress
+            </h3>
+            <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-slate-50'} mb-3`}>
+              <p className="font-medium mb-2">Your Progress</p>
+              <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} space-y-1`}>
+                <p>Questions answered: {totalAnswered}</p>
+                <p>Correct answers: {totalCorrect} ({totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0}%)</p>
+                <p>Lessons completed: {completedLessons.length}/{lessons.length}</p>
+                <p>Bookmarked questions: {bookmarks.length}</p>
+                <p>Mastered (spaced rep): {getMasteredCount()}</p>
+              </div>
+            </div>
+            {/* Export/Import Buttons */}
+            <div className="flex gap-3 mb-3">
+              <button
+                onClick={exportProgress}
+                className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+              >
+                📤 Export
+              </button>
+              <label className={`flex-1 py-3 rounded-xl font-semibold transition-colors text-center cursor-pointer ${darkMode ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-500 hover:bg-emerald-600 text-white'}`}>
+                📥 Import
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importProgress}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} mb-3`}>
+              Backup your progress or restore from a previous export
+            </p>
+
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
+            >
+              Reset All Progress
+            </button>
+          </div>
+
+          {/* Achievements Section */}
+          <div className="mb-6">
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wide mb-3`}>
+              Achievements
+            </h3>
+            <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-slate-50'}`}>
+              <p className="font-medium mb-3">
+                {getEarnedBadges().length} of {BADGES.length} badges earned
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {BADGES.map((badge) => {
+                  const earned = getEarnedBadges().some(b => b.id === badge.id);
+                  return (
+                    <div
+                      key={badge.id}
+                      className={`text-center p-2 rounded-lg transition-all ${
+                        earned
+                          ? darkMode ? 'bg-slate-600' : 'bg-white border border-amber-200'
+                          : darkMode ? 'bg-slate-800 opacity-40' : 'bg-slate-100 opacity-40'
+                      }`}
+                      title={badge.description}
+                    >
+                      <span className={`text-2xl ${earned ? '' : 'grayscale'}`}>{badge.icon}</span>
+                      <p className={`text-xs mt-1 font-medium truncate ${earned ? '' : darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        {badge.name}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} mt-3 text-center`}>
+                Tap a badge to see how to earn it
+              </p>
+            </div>
+          </div>
+
+          {/* About Section */}
+          <div className="mb-6">
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wide mb-3`}>
+              About
+            </h3>
+            <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-slate-50'}`}>
+              <p className="font-bold text-lg mb-1">Ham Radio Technician Prep</p>
+              <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-3`}>Version {APP_VERSION}</p>
+              <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} space-y-2`}>
+                <p>
+                  Questions sourced from the official FCC Technician Class question pool (2022-2026).
+                </p>
+                <p>
+                  This app is not affiliated with the FCC or ARRL. Use for educational purposes only.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setAppState('menu')}
+            className={`w-full py-3 rounded-lg text-sm font-semibold ${darkMode ? 'text-slate-400 hover:text-white border-slate-600' : 'text-slate-600 hover:bg-slate-50 border-slate-200'} border`}
+          >
+            Back to Home
+          </button>
+        </div>
+
+        {/* Reset Confirmation Dialog */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className={`${darkMode ? 'bg-slate-800' : 'bg-white'} p-6 rounded-2xl shadow-2xl max-w-sm w-full`}>
+              <h3 className="text-xl font-bold mb-2">Reset All Progress?</h3>
+              <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-6`}>
+                This will permanently delete all your study stats, completed lessons, bookmarks, and spaced repetition data. This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className={`flex-1 py-3 rounded-xl font-semibold ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={resetAllProgress}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     );
   }
@@ -695,32 +1327,32 @@ export default function Home() {
     const totalLessons = lessons.length;
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 bg-slate-100 text-slate-900">
+      <main className={`min-h-screen flex flex-col items-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
         <div className="max-w-2xl w-full">
           {/* Header */}
-          <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 mb-6">
+          <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-6 rounded-2xl shadow-xl border mb-6`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 📚 Learn
               </h2>
               <button
                 onClick={() => setAppState('menu')}
-                className="text-sm text-slate-500 hover:text-slate-700"
+                className={`text-sm ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 ← Back
               </button>
             </div>
-            <p className="text-slate-600 text-sm mb-4">
+            <p className={`${darkMode ? 'text-slate-400' : 'text-slate-600'} text-sm mb-4`}>
               Study each topic before testing yourself. Each lesson takes about 5 minutes to read.
             </p>
             <div className="flex items-center gap-3">
-              <div className="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div className={`flex-1 ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} h-3 rounded-full overflow-hidden`}>
                 <div
                   className="bg-emerald-500 h-full transition-all duration-300"
                   style={{ width: `${totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0}%` }}
                 ></div>
               </div>
-              <span className="text-sm font-semibold text-slate-600">
+              <span className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {completedCount}/{totalLessons} completed
               </span>
             </div>
@@ -736,39 +1368,41 @@ export default function Home() {
               const masteredCount = getMasteredCount(lesson.id);
 
               return (
-                <div key={lesson.id} className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div key={lesson.id} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} rounded-xl shadow-md border overflow-hidden`}>
                   <button
                     onClick={() => openLesson(lesson)}
-                    className="w-full p-5 hover:bg-slate-50 transition-all text-left flex items-center gap-4"
+                    className={`w-full p-5 ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-50'} transition-all text-left flex items-center gap-4`}
                   >
                     <div className="text-3xl">{lesson.icon}</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
+                        <span className={`font-mono text-xs ${darkMode ? 'text-blue-400 bg-blue-900/50' : 'text-blue-500 bg-blue-50'} px-2 py-0.5 rounded`}>
                           {lesson.id}
                         </span>
                         {completed && (
-                          <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                          <span className={`text-xs ${darkMode ? 'text-emerald-400 bg-emerald-900/50' : 'text-emerald-600 bg-emerald-50'} px-2 py-0.5 rounded`}>
                             ✓ Completed
                           </span>
                         )}
                         {accuracy !== null && (
                           <span className={`text-xs px-2 py-0.5 rounded ${
-                            accuracy >= 74 ? 'text-green-600 bg-green-50' : 'text-amber-600 bg-amber-50'
+                            accuracy >= 74
+                              ? (darkMode ? 'text-green-400 bg-green-900/50' : 'text-green-600 bg-green-50')
+                              : (darkMode ? 'text-amber-400 bg-amber-900/50' : 'text-amber-600 bg-amber-50')
                           }`}>
                             {accuracy}% accuracy
                           </span>
                         )}
                         {masteredCount > 0 && (
-                          <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
+                          <span className={`text-xs ${darkMode ? 'text-purple-400 bg-purple-900/50' : 'text-purple-600 bg-purple-50'} px-2 py-0.5 rounded`}>
                             {masteredCount} mastered
                           </span>
                         )}
                       </div>
-                      <h3 className="font-bold text-slate-800 mt-1">{lesson.title}</h3>
-                      <p className="text-sm text-slate-500">{lesson.subtitle}</p>
+                      <h3 className={`font-bold ${darkMode ? 'text-white' : 'text-slate-800'} mt-1`}>{lesson.title}</h3>
+                      <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{lesson.subtitle}</p>
                     </div>
-                    <div className="text-slate-300">
+                    <div className={darkMode ? 'text-slate-500' : 'text-slate-300'}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -779,7 +1413,7 @@ export default function Home() {
                     <div className="px-5 pb-4 pt-0">
                       <button
                         onClick={() => startReviewMode(lesson.id)}
-                        className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-sm font-semibold transition border border-rose-200"
+                        className={`w-full py-2 ${darkMode ? 'bg-rose-900/30 hover:bg-rose-900/50 border-rose-800' : 'bg-rose-50 hover:bg-rose-100 border-rose-200'} text-rose-500 rounded-lg text-sm font-semibold transition border`}
                       >
                         🔄 Review {dueCount} due question{dueCount !== 1 ? 's' : ''}
                       </button>
@@ -799,21 +1433,21 @@ export default function Home() {
     const completed = isLessonCompleted(currentLesson.id);
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 bg-slate-100 text-slate-900">
+      <main className={`min-h-screen flex flex-col items-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
         <div className="max-w-2xl w-full">
           {/* Header */}
-          <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 mb-6">
+          <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-6 rounded-2xl shadow-xl border mb-6`}>
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setAppState('learn')}
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                className={`text-sm ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'} flex items-center gap-1`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 Back to Topics
               </button>
-              <span className="text-xs text-slate-400">
+              <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                 ~{currentLesson.estimatedMinutes} min read
               </span>
             </div>
@@ -821,40 +1455,40 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-2">
               <span className="text-4xl">{currentLesson.icon}</span>
               <div>
-                <span className="font-mono text-sm text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
+                <span className={`font-mono text-sm ${darkMode ? 'text-blue-400 bg-blue-900/50' : 'text-blue-500 bg-blue-50'} px-2 py-0.5 rounded`}>
                   {currentLesson.id}
                 </span>
                 {completed && (
-                  <span className="ml-2 text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                  <span className={`ml-2 text-xs ${darkMode ? 'text-emerald-400 bg-emerald-900/50' : 'text-emerald-600 bg-emerald-50'} px-2 py-0.5 rounded`}>
                     ✓ Completed
                   </span>
                 )}
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-slate-800">{currentLesson.title}</h1>
-            <p className="text-slate-500">{currentLesson.subtitle}</p>
+            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{currentLesson.title}</h1>
+            <p className={darkMode ? 'text-slate-400' : 'text-slate-500'}>{currentLesson.subtitle}</p>
           </div>
 
           {/* Lesson Sections */}
           <div className="space-y-4">
             {currentLesson.sections.map((section, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                  <span className="text-blue-500 text-sm font-mono bg-blue-50 px-2 py-0.5 rounded">
+              <div key={index} className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-6 rounded-xl shadow-md border`}>
+                <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'} mb-3 flex items-center gap-2`}>
+                  <span className={`text-sm font-mono ${darkMode ? 'text-blue-400 bg-blue-900/50' : 'text-blue-500 bg-blue-50'} px-2 py-0.5 rounded`}>
                     {index + 1}
                   </span>
                   {section.title}
                 </h2>
-                <p className="text-slate-700 leading-relaxed mb-4">{section.content}</p>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-slate-700'} leading-relaxed mb-4`}>{section.content}</p>
 
                 {/* Key Facts */}
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                <div className={`${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-100'} p-4 rounded-lg border`}>
+                  <p className={`text-xs font-bold ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wide mb-2`}>
                     Key Facts
                   </p>
                   <ul className="space-y-2">
                     {section.keyFacts.map((fact, factIndex) => (
-                      <li key={factIndex} className="flex items-start gap-2 text-sm text-slate-700">
+                      <li key={factIndex} className={`flex items-start gap-2 text-sm ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                         <span className="text-emerald-500 mt-0.5">✓</span>
                         {fact}
                       </li>
@@ -866,15 +1500,15 @@ export default function Home() {
           </div>
 
           {/* Exam Tip */}
-          <div className="bg-amber-50 p-5 rounded-xl border border-amber-200 mt-4">
-            <p className="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1">
+          <div className={`${darkMode ? 'bg-amber-900/30 border-amber-800' : 'bg-amber-50 border-amber-200'} p-5 rounded-xl border mt-4`}>
+            <p className={`text-xs font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'} uppercase tracking-wide mb-1`}>
               💡 Exam Tip
             </p>
-            <p className="text-amber-800 text-sm">{currentLesson.examTip}</p>
+            <p className={`${darkMode ? 'text-amber-300' : 'text-amber-800'} text-sm`}>{currentLesson.examTip}</p>
           </div>
 
           {/* Action Buttons */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 mt-4">
+          <div className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-6 rounded-xl shadow-md border mt-4`}>
             <div className="flex flex-col sm:flex-row gap-3">
               {!completed && (
                 <button
@@ -891,10 +1525,54 @@ export default function Home() {
                 📝 Take Quiz ({currentLesson.questionCount} questions)
               </button>
             </div>
-            <p className="text-xs text-slate-400 text-center mt-3">
+            <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} text-center mt-3`}>
               Test your knowledge on {currentLesson.title} questions
             </p>
           </div>
+
+          {/* Previous/Next Lesson Navigation */}
+          {(() => {
+            const currentIndex = lessons.findIndex(l => l.id === currentLesson.id);
+            const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+            const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+
+            return (
+              <div className={`flex gap-3 mt-4`}>
+                <button
+                  onClick={() => prevLesson && openLesson(prevLesson)}
+                  disabled={!prevLesson}
+                  className={`flex-1 py-3 px-4 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
+                    prevLesson
+                      ? (darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700')
+                      : (darkMode ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-slate-50 text-slate-300 cursor-not-allowed')
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="text-sm">
+                    {prevLesson ? `${prevLesson.id}: ${prevLesson.title}` : 'No previous'}
+                  </span>
+                </button>
+                <button
+                  onClick={() => nextLesson && openLesson(nextLesson)}
+                  disabled={!nextLesson}
+                  className={`flex-1 py-3 px-4 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
+                    nextLesson
+                      ? (darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700')
+                      : (darkMode ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-slate-50 text-slate-300 cursor-not-allowed')
+                  }`}
+                >
+                  <span className="text-sm">
+                    {nextLesson ? `${nextLesson.id}: ${nextLesson.title}` : 'No next'}
+                  </span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })()}
         </div>
       </main>
     );
@@ -918,8 +1596,8 @@ export default function Home() {
       : 0;
 
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 text-slate-900">
-        <div className={`max-w-xl w-full bg-white p-8 rounded-2xl shadow-xl text-center border-t-8 ${
+      <main className={`min-h-screen flex flex-col items-center justify-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
+        <div className={`max-w-xl w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-8 rounded-2xl shadow-xl text-center border-t-8 ${
           mode === 'review' ? 'border-rose-500' : 'border-blue-600'
         }`}>
           <h2 className="text-3xl font-bold mb-6">
@@ -938,29 +1616,31 @@ export default function Home() {
             >
               {percentage}%
             </div>
-            <p className="text-xl text-slate-600">
+            <p className={`text-xl ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               You scored {score} out of {total}
             </p>
             {isExam && (
               <div
                 className={`mt-4 inline-block px-4 py-1 rounded-full font-bold text-sm ${
-                  passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  passed
+                    ? (darkMode ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-800')
+                    : (darkMode ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-800')
                 }`}
               >
                 {passed ? 'PASSED (>=74%)' : 'NEEDS STUDY (<74%)'}
               </div>
             )}
             {mode === 'review' && (
-              <div className="mt-4 p-4 bg-rose-50 rounded-xl border border-rose-200 text-left">
-                <p className="text-sm text-rose-800">
+              <div className={`mt-4 p-4 ${darkMode ? 'bg-rose-900/30 border-rose-800' : 'bg-rose-50 border-rose-200'} rounded-xl border text-left`}>
+                <p className={`text-sm ${darkMode ? 'text-rose-300' : 'text-rose-800'}`}>
                   <span className="font-bold">🎯 Review Progress:</span>
                 </p>
-                <ul className="text-sm text-rose-700 mt-2 space-y-1">
+                <ul className={`text-sm ${darkMode ? 'text-rose-400' : 'text-rose-700'} mt-2 space-y-1`}>
                   <li>✓ {score} correct this session</li>
                   <li>🎉 {reviewMastered} questions mastered (3 correct in a row)</li>
                   <li>🔄 {getDueReviewCount()} questions still need review</li>
                 </ul>
-                <p className="text-xs text-rose-500 mt-2">
+                <p className={`text-xs ${darkMode ? 'text-rose-500' : 'text-rose-500'} mt-2`}>
                   Questions you got wrong will reappear sooner. Get them right 3 times to master!
                 </p>
               </div>
@@ -969,8 +1649,8 @@ export default function Home() {
 
           {/* Per-subelement stats (Exam Mode only) */}
           {isExam && subStatsEntries.length > 0 && (
-            <div className="mb-6 text-left border border-slate-100 rounded-xl p-4 bg-slate-50">
-              <h3 className="text-sm font-bold text-slate-700 mb-2">
+            <div className={`mb-6 text-left border rounded-xl p-4 ${darkMode ? 'border-slate-700 bg-slate-700' : 'border-slate-100 bg-slate-50'}`}>
+              <h3 className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-700'} mb-2`}>
                 Performance by Subelement (This Exam)
               </h3>
               <ul className="space-y-1 text-sm">
@@ -979,8 +1659,8 @@ export default function Home() {
                     stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
                   return (
                     <li key={sub} className="flex justify-between items-center">
-                      <span className="font-mono text-slate-700">{sub}</span>
-                      <span className="text-slate-600">
+                      <span className={`font-mono ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{sub}</span>
+                      <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
                         {stats.correct}/{stats.total} correct
                         <span
                           className={`ml-2 text-xs font-semibold ${
@@ -999,8 +1679,8 @@ export default function Home() {
 
           {/* Missed questions review (Exam Mode only) */}
           {isExam && missedQuestions.length > 0 && (
-            <div className="mb-6 text-left max-h-64 overflow-y-auto border border-slate-100 rounded-xl p-4 bg-slate-50">
-              <h3 className="text-sm font-bold text-slate-700 mb-2">
+            <div className={`mb-6 text-left max-h-64 overflow-y-auto border rounded-xl p-4 ${darkMode ? 'border-slate-700 bg-slate-700' : 'border-slate-100 bg-slate-50'}`}>
+              <h3 className={`text-sm font-bold ${darkMode ? 'text-slate-300' : 'text-slate-700'} mb-2`}>
                 Review Missed Questions ({missedQuestions.length})
               </h3>
               <ul className="space-y-3 text-sm">
@@ -1009,27 +1689,31 @@ export default function Home() {
                   return (
                     <li
                       key={q.id}
-                      className="border-b border-slate-200 pb-2 last:border-b-0 last:pb-0"
+                      className={`border-b ${darkMode ? 'border-slate-600' : 'border-slate-200'} pb-2 last:border-b-0 last:pb-0`}
                     >
                       <div className="flex justify-between items-start gap-2">
-                        <p className="font-semibold text-slate-800">
-                          <span className="text-xs font-mono text-slate-500 mr-1">
+                        <p className={`font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+                          <span className={`text-xs font-mono ${darkMode ? 'text-slate-500' : 'text-slate-500'} mr-1`}>
                             [{q.id}]
                           </span>
                           {q.question}
                         </p>
                         <button
                           onClick={() => toggleBookmark(q.id)}
-                          className="text-xs px-2 py-1 rounded-full border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 shrink-0"
+                          className={`text-xs px-2 py-1 rounded-full border shrink-0 ${
+                            darkMode
+                              ? 'border-amber-700 text-amber-400 bg-amber-900/30 hover:bg-amber-900/50'
+                              : 'border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100'
+                          }`}
                         >
                           {bookmarked ? '★ Bookmarked' : '☆ Bookmark'}
                         </button>
                       </div>
-                      <p className="mt-1 text-slate-600">
+                      <p className={`mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                         <span className="font-semibold">Correct answer: </span>
                         {q.correctAnswer}
                       </p>
-                      <p className="mt-1 text-slate-500 text-xs">{q.explanation}</p>
+                      <p className={`mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-500'} text-xs`}>{q.explanation}</p>
                     </li>
                   );
                 })}
@@ -1041,7 +1725,11 @@ export default function Home() {
           {isExam && missedQuestions.length > 0 && (
             <button
               onClick={startRetryMissed}
-              className="w-full mb-4 py-3 border border-blue-200 text-blue-700 rounded-lg font-semibold text-sm hover:bg-blue-50"
+              className={`w-full mb-4 py-3 border rounded-lg font-semibold text-sm ${
+                darkMode
+                  ? 'border-blue-700 text-blue-400 hover:bg-blue-900/30'
+                  : 'border-blue-200 text-blue-700 hover:bg-blue-50'
+              }`}
             >
               🔁 Retry Missed Questions Only
             </button>
@@ -1049,7 +1737,9 @@ export default function Home() {
 
           <button
             onClick={() => setAppState('menu')}
-            className="w-full py-3 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-bold transition"
+            className={`w-full py-3 rounded-lg font-bold transition ${
+              darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'
+            }`}
           >
             Back to Home
           </button>
@@ -1069,17 +1759,17 @@ export default function Home() {
     mode === 'exam' ? 'Practice Exam' : mode === 'bookmarks' ? 'Bookmarks' : mode === 'review' ? 'Review Mode' : 'Study Mode';
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 text-slate-900">
-      <div className="max-w-2xl w-full bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-        
+    <main className={`min-h-screen flex flex-col items-center justify-center p-4 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <div className={`max-w-2xl w-full ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-6 rounded-2xl shadow-xl border`}>
+
         {/* Header with Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <div>
-              <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+              <span className={`text-sm font-bold ${darkMode ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-wider`}>
                 {modeLabel}
               </span>
-              <div className="text-xs text-slate-400">
+              <div className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                 {selectedSubelement === 'ALL'
                   ? 'All subelements'
                   : `Subelement ${selectedSubelement}`}
@@ -1091,18 +1781,18 @@ export default function Home() {
                 onClick={() => toggleBookmark(currentQuestion.id)}
                 className={`text-xs px-3 py-1 rounded-full border ${
                   currentBookmarked
-                    ? 'border-amber-400 bg-amber-50 text-amber-700'
-                    : 'border-slate-200 bg-slate-50 text-slate-500'
-                } hover:bg-amber-100`}
+                    ? (darkMode ? 'border-amber-700 bg-amber-900/30 text-amber-400' : 'border-amber-400 bg-amber-50 text-amber-700')
+                    : (darkMode ? 'border-slate-600 bg-slate-700 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-500')
+                } ${darkMode ? 'hover:bg-amber-900/50' : 'hover:bg-amber-100'}`}
               >
                 {currentBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
               </button>
-              <span className="text-sm font-semibold text-slate-600">
+              <span className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {currentQuestionIndex + 1} / {activeQuestions.length}
               </span>
             </div>
           </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+          <div className={`w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} h-2 rounded-full overflow-hidden`}>
             <div
               className="bg-blue-500 h-full transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -1111,7 +1801,7 @@ export default function Home() {
         </div>
 
         {/* Question Text */}
-        <h2 className="text-xl font-bold mb-8 text-slate-800 leading-relaxed">
+        <h2 className={`text-xl font-bold mb-8 ${darkMode ? 'text-white' : 'text-slate-800'} leading-relaxed`}>
           <span className="text-blue-500 mr-2 text-sm font-mono align-top">
             [{currentQuestion.id}]
           </span>
@@ -1123,11 +1813,12 @@ export default function Home() {
           {currentQuestion.options.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrect = isAnswerCorrect(index, currentQuestion.correctAnswer);
-            
-            let buttonStyle =
-              'border-slate-200 hover:border-blue-400 hover:bg-blue-50'; // default
+
+            let buttonStyle = darkMode
+              ? 'border-slate-600 hover:border-blue-500 hover:bg-slate-700'
+              : 'border-slate-200 hover:border-blue-400 hover:bg-blue-50'; // default
             let icon = null;
-            
+
             if ((mode === 'study' || mode === 'bookmarks' || mode === 'review') && showExplanation) {
               if (isCorrect) {
                 buttonStyle =
@@ -1137,7 +1828,7 @@ export default function Home() {
                 buttonStyle = 'bg-red-500 border-red-600 text-white ring-2 ring-red-600';
                 icon = <span className="mr-2 text-xl">✗</span>;
               } else {
-                buttonStyle = 'opacity-50 border-slate-100';
+                buttonStyle = darkMode ? 'opacity-50 border-slate-700' : 'opacity-50 border-slate-100';
               }
             } else if (isSelected) {
               buttonStyle =
@@ -1159,17 +1850,17 @@ export default function Home() {
         </div>
 
         {/* Footer Actions */}
-        <div className="mt-8 pt-6 border-t border-slate-100">
+        <div className={`mt-8 pt-6 border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
           {(mode === 'study' || mode === 'bookmarks' || mode === 'review') && showExplanation && (
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-blue-900 mb-6">
-              <p className="font-bold text-xs uppercase tracking-wide text-blue-400 mb-1">
+            <div className={`${darkMode ? 'bg-blue-900/30 border-blue-800 text-blue-200' : 'bg-blue-50 border-blue-100 text-blue-900'} p-4 rounded-lg border mb-6`}>
+              <p className={`font-bold text-xs uppercase tracking-wide ${darkMode ? 'text-blue-400' : 'text-blue-400'} mb-1`}>
                 Explanation
               </p>
               <p>{currentQuestion.explanation}</p>
               {/* Show spaced rep status in review mode */}
               {mode === 'review' && (
-                <div className="mt-3 pt-3 border-t border-blue-200">
-                  <p className="text-xs text-blue-500">
+                <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-blue-700' : 'border-blue-200'}`}>
+                  <p className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-500'}`}>
                     {spacedRepData[currentQuestion.id]?.correctStreak === 3
                       ? '🎉 Mastered! This question won\'t appear in reviews anymore.'
                       : spacedRepData[currentQuestion.id]?.correctStreak === 2
@@ -1186,7 +1877,7 @@ export default function Home() {
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setAppState('menu')}
-              className="px-4 py-2 text-slate-400 hover:text-red-500 text-sm font-semibold"
+              className={`px-4 py-2 ${darkMode ? 'text-slate-500 hover:text-red-400' : 'text-slate-400 hover:text-red-500'} text-sm font-semibold`}
             >
               Quit
             </button>

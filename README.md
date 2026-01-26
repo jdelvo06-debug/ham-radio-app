@@ -9,16 +9,22 @@ A modern web application to help you prepare for the FCC Amateur Radio Technicia
 - **📝 Practice Exam** - Simulate the real exam with 35 random questions and pass/fail scoring
 - **🔄 Spaced Repetition** - Questions you miss automatically resurface for review until mastered
 - **⭐ Bookmarks** - Save difficult questions for focused review
-- **📊 Analytics** - Track your performance by subelement to identify weak areas
+- **📊 Analytics & Weak Areas** - Track performance and get personalized study recommendations
+- **🔥 Study Streaks** - Track consecutive study days to build habits
+- **🏆 Achievements** - Earn 15 badges for milestones like questions answered, streaks, and exams passed
+- **🌙 Dark Mode** - Easy-on-the-eyes dark theme for night studying
+- **⚙️ Settings** - Export/import progress, reset data, achievements gallery, about info
 - **Subelement Filtering** - Focus on specific topics (T0-T9)
 - **Retry Missed** - After an exam, retry only the questions you got wrong
-- **Persistent Progress** - Your bookmarks, stats, review data, and lesson progress are saved locally
+- **Persistent Progress** - Your bookmarks, stats, review data, streaks, and lesson progress are saved locally
 
 ## Screenshots
 
 ### Main Menu
 The home screen displays:
 - **Title:** "Technician Class - Amateur Radio License Prep"
+- **Streak Display:** Shows 🔥 current streak, ⭐ best streak, 📅 total study days (appears after first study session)
+- **Achievements Preview:** Shows earned badge icons (appears after earning first badge)
 - **Subelement Filter:** Dropdown to focus on specific topics (T0-T9) or all questions
 - **Learn Button:** Purple - study topics with guided lessons (~5 min each)
 - **Study Mode Button:** Green - immediate answers & explanations
@@ -26,6 +32,7 @@ The home screen displays:
 - **Bookmarks Button:** Yellow - practice only saved questions
 - **Review Due Button:** Rose/Pink - spaced repetition reviews
 - **Analytics Button:** View performance stats
+- **Settings Button:** Dark mode, achievements, reset progress, about
 
 ### Learn Mode
 The guided learning interface shows:
@@ -42,6 +49,7 @@ Each lesson includes:
 - Exam tip at the end of each lesson
 - "Mark as Completed" button to track progress
 - "Take Quiz" button to test on that specific topic
+- Previous/Next navigation to move between lessons sequentially
 
 ### Study Mode
 The quiz interface shows:
@@ -59,12 +67,12 @@ Similar to Study Mode but:
 - Results shown only after completing all 35 questions
 
 ### Analytics Dashboard
-Performance tracking screen:
+Performance tracking screen with intelligent weak areas analysis:
 - Overall accuracy percentage
-- Table showing each subelement (T0-T9) with:
-  - Questions seen
-  - Correct answers
-  - Accuracy percentage (green if ≥74%, red if below)
+- **Weak Areas (red)** - Topics below 74%, sorted weakest first with "Study" buttons
+- **Strong Areas (green)** - Topics at or above 74% passing threshold
+- **Need More Practice (amber)** - Topics with fewer than 5 questions answered
+- Full breakdown table showing each subelement (T0-T9) with questions seen, correct, and accuracy
 
 ## Tech Stack
 
@@ -172,6 +180,31 @@ ham-radio-app/
 - Shows mastery progress during review sessions
 - Mastered questions (3 correct streak) are removed from active reviews
 
+### Settings
+- **Dark Mode** - Toggle between light and dark themes (saved automatically)
+- **Progress Summary** - View your total questions answered, accuracy, lessons completed, bookmarks, and mastered questions
+- **Export/Import** - Backup your progress to a JSON file or restore from a previous backup
+- **Achievements Gallery** - View all 15 badges with earned/locked status
+- **Reset All Progress** - Clear all data and start fresh (with confirmation)
+- **About** - Version info and FCC attribution
+
+### Study Streaks & Badges
+The app includes gamification features to encourage daily studying:
+
+**Streaks:**
+- Track consecutive days of study
+- See your current streak, best streak, and total study days on the main menu
+- Streaks update automatically when you answer any question
+
+**Badges (15 total):**
+| Category | Badges |
+|----------|--------|
+| Questions | First Steps (1), Getting Started (10), Dedicated Learner (50), Century Club (100) |
+| Streaks | On a Roll (3 days), Week Warrior (7), Two Week Champ (14), Monthly Master (30) |
+| Lessons | Student (1 complete), Scholar (all 10) |
+| Mastery | Memory Pro (1), Review Expert (10), Knowledge Keeper (50) |
+| Exams | Exam Ready (pass 1), Test Veteran (pass 5) |
+
 ## Topics Covered
 
 | Code | Topic | Description |
@@ -235,6 +268,8 @@ The app uses browser localStorage to persist:
 - **Bookmarks** - Array of bookmarked question IDs
 - **Analytics** - Per-subelement accuracy statistics
 - **Completed Lessons** - Track which lessons you've finished
+- **Spaced Repetition** - Review schedules and mastery progress
+- **Streaks & Badges** - Study streak data and passed exam count
 
 No account or server required - all data stays in your browser.
 
