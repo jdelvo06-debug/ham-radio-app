@@ -14,9 +14,37 @@ A modern web application to help you prepare for the FCC Amateur Radio Technicia
 
 ## Screenshots
 
-| Menu | Study Mode | Results |
-|------|------------|---------|
-| Main menu with mode selection | Question with immediate feedback | Exam results with breakdown |
+### Main Menu
+The home screen displays:
+- **Title:** "Technician Class - Amateur Radio License Prep"
+- **Subelement Filter:** Dropdown to focus on specific topics (T0-T9) or all questions
+- **Study Mode Button:** Green - immediate answers & explanations
+- **Practice Exam Button:** Blue - 35 questions, no hints, pass/fail
+- **Bookmarks Button:** Yellow - practice only saved questions
+- **Analytics Button:** View performance stats
+
+### Study Mode
+The quiz interface shows:
+- Progress bar and question counter (e.g., "1 / 411")
+- Question ID and text (e.g., "[T0B08] Which is a proper grounding method for a tower?")
+- Four answer options as clickable buttons
+- **After answering:** Correct answer highlighted in green with checkmark, wrong answers faded
+- **Explanation panel:** Blue box explaining why the answer is correct
+- Bookmark toggle to save difficult questions
+
+### Practice Exam
+Similar to Study Mode but:
+- Counter shows "1 / 35" (exam length)
+- No immediate feedback - just select and move to next
+- Results shown only after completing all 35 questions
+
+### Analytics Dashboard
+Performance tracking screen:
+- Overall accuracy percentage
+- Table showing each subelement (T0-T9) with:
+  - Questions seen
+  - Correct answers
+  - Accuracy percentage (green if ≥74%, red if below)
 
 ## Tech Stack
 
