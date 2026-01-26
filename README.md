@@ -4,13 +4,15 @@ A modern web application to help you prepare for the FCC Amateur Radio Technicia
 
 ## Features
 
-- **Study Mode** - Practice all 411 questions with immediate feedback and explanations
-- **Practice Exam** - Simulate the real exam with 35 random questions and pass/fail scoring
-- **Bookmarks** - Save difficult questions for focused review
-- **Analytics** - Track your performance by subelement to identify weak areas
+- **📚 Learn Mode** - Study 10 topic-based lessons before testing yourself
+- **📖 Study Mode** - Practice all 411 questions with immediate feedback and explanations
+- **📝 Practice Exam** - Simulate the real exam with 35 random questions and pass/fail scoring
+- **🔄 Spaced Repetition** - Questions you miss automatically resurface for review until mastered
+- **⭐ Bookmarks** - Save difficult questions for focused review
+- **📊 Analytics** - Track your performance by subelement to identify weak areas
 - **Subelement Filtering** - Focus on specific topics (T0-T9)
 - **Retry Missed** - After an exam, retry only the questions you got wrong
-- **Persistent Progress** - Your bookmarks and stats are saved locally
+- **Persistent Progress** - Your bookmarks, stats, review data, and lesson progress are saved locally
 
 ## Screenshots
 
@@ -18,10 +20,28 @@ A modern web application to help you prepare for the FCC Amateur Radio Technicia
 The home screen displays:
 - **Title:** "Technician Class - Amateur Radio License Prep"
 - **Subelement Filter:** Dropdown to focus on specific topics (T0-T9) or all questions
+- **Learn Button:** Purple - study topics with guided lessons (~5 min each)
 - **Study Mode Button:** Green - immediate answers & explanations
 - **Practice Exam Button:** Blue - 35 questions, no hints, pass/fail
 - **Bookmarks Button:** Yellow - practice only saved questions
+- **Review Due Button:** Rose/Pink - spaced repetition reviews
 - **Analytics Button:** View performance stats
+
+### Learn Mode
+The guided learning interface shows:
+- Progress bar showing completed lessons (e.g., "3/10 completed")
+- 10 topic cards with icons, titles, and completion status
+- Quiz accuracy displayed for each topic you've practiced
+- Mastered question count per topic
+- "Review X due" button appears when questions need review
+
+### Lesson View
+Each lesson includes:
+- 5-6 sections with detailed explanations
+- "Key Facts" boxes highlighting important points
+- Exam tip at the end of each lesson
+- "Mark as Completed" button to track progress
+- "Take Quiz" button to test on that specific topic
 
 ### Study Mode
 The quiz interface shows:
@@ -50,7 +70,7 @@ Performance tracking screen:
 
 - **Frontend:** Next.js 16, React 19, TypeScript
 - **Styling:** Tailwind CSS 4
-- **Data:** Static JSON (411 FCC questions)
+- **Data:** Static JSON (411 FCC questions + 10 lessons)
 - **Parsers:** Python 3 scripts for FCC question pool processing
 
 ## Getting Started
@@ -100,6 +120,7 @@ ham-radio-app/
 │   ├── app/
 │   │   ├── page.tsx           # Main application component
 │   │   ├── ham_radio_questions.json  # 411 parsed questions
+│   │   ├── lessons.json       # 10 topic lessons
 │   │   ├── layout.tsx         # Root layout
 │   │   └── globals.css        # Tailwind imports
 │   ├── public/                # Static assets
@@ -115,6 +136,14 @@ ham-radio-app/
 ```
 
 ## Study Modes Explained
+
+### Learn Mode
+- 10 topic-based lessons covering all exam content
+- Each lesson takes ~5 minutes to read
+- Organized sections with key facts highlighted
+- Exam tips to help you remember important concepts
+- Track your progress with "Mark as Completed"
+- Jump directly to quiz for any topic
 
 ### Study Mode
 - All questions from selected subelement (or all)
@@ -134,6 +163,30 @@ ham-radio-app/
 - Same behavior as Study Mode (immediate feedback)
 - Perfect for reviewing trouble spots
 
+### Review Mode (Spaced Repetition)
+- Automatically resurfaces questions you've missed or need to review
+- Simple algorithm: get a question right 3 times in a row = mastered
+- Wrong answers reset the streak and schedule immediate review
+- Review intervals increase: immediate → 1 hour → 1 day → 7 days (mastered)
+- Access from main menu (rose/pink button) or per-topic in Learn section
+- Shows mastery progress during review sessions
+- Mastered questions (3 correct streak) are removed from active reviews
+
+## Topics Covered
+
+| Code | Topic | Description |
+|------|-------|-------------|
+| T0 | Safety | Electrical, Antenna & RF Hazards |
+| T1 | FCC Rules | Licensing, Privileges & Regulations |
+| T2 | Operating Procedures | Repeaters, Nets & Emergency Comms |
+| T3 | Radio Wave Propagation | How Signals Travel |
+| T4 | Amateur Radio Practices | Station Setup & Controls |
+| T5 | Electrical Principles | Ohm's Law, Power & Math |
+| T6 | Electronic Components | Resistors, Capacitors, Semiconductors |
+| T7 | Practical Circuits | Equipment & Troubleshooting |
+| T8 | Signals & Emissions | Modulation, Digital & Satellites |
+| T9 | Antennas & Feed Lines | Antenna Types, Coax & Connectors |
+
 ## FCC Technician Exam Info
 
 | Fact | Value |
@@ -143,21 +196,6 @@ ham-radio-app/
 | Passing score | 74% (26 correct) |
 | Pool valid | 2022-2026 |
 | License valid | 10 years |
-
-### Subelements
-
-| Code | Topic |
-|------|-------|
-| T0 | Safety |
-| T1 | FCC Rules |
-| T2 | Operating Procedures |
-| T3 | Radio Wave Characteristics |
-| T4 | Amateur Radio Practices |
-| T5 | Electrical Principles |
-| T6 | Electronic Components |
-| T7 | Station Equipment |
-| T8 | Modulation & Signals |
-| T9 | Antennas & Feed Lines |
 
 ## Python Parsers
 
@@ -196,6 +234,7 @@ python generate_complete_json.py > my-study-app/app/ham_radio_questions.json
 The app uses browser localStorage to persist:
 - **Bookmarks** - Array of bookmarked question IDs
 - **Analytics** - Per-subelement accuracy statistics
+- **Completed Lessons** - Track which lessons you've finished
 
 No account or server required - all data stays in your browser.
 

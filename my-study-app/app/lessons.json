@@ -1,0 +1,646 @@
+{
+  "lessons": [
+    {
+      "id": "T0",
+      "title": "Safety",
+      "subtitle": "Electrical, Antenna & RF Hazards",
+      "icon": "⚡",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Electrical Shock Hazards",
+          "content": "Current kills, not voltage alone. As little as 100 milliamps (0.1A) flowing through the body can be fatal. This is about the amount of current drawn by a small light bulb! Effects range from barely perceptible (1mA) to painful shock (5mA) to muscle contractions where you can't let go (10-20mA) to cardiac arrest (100mA+).",
+          "keyFacts": [
+            "100 mA can be fatal - remember this number for the exam",
+            "First aid: Turn OFF power first, then call 911, begin CPR if not breathing",
+            "Never touch a shock victim until power is disconnected"
+          ]
+        },
+        {
+          "title": "Grounding & Circuit Protection",
+          "content": "Proper grounding provides a safe path for fault current. The green wire in a three-prong plug connects to the chassis - never remove or bypass it! Different devices protect different things: GFCI (Ground Fault Circuit Interrupter) protects PEOPLE by detecting when current goes where it shouldn't (trips at ~5mA). Fuses and circuit breakers protect EQUIPMENT from overcurrent - they're too slow to protect humans.",
+          "keyFacts": [
+            "GFCI = protects people, Fuses/Breakers = protect equipment",
+            "Never bypass the ground prong on a three-prong plug",
+            "Single-point grounding reduces ground loops"
+          ]
+        },
+        {
+          "title": "Tower & Antenna Safety",
+          "content": "Tower work requires proper training and equipment. Never climb alone - always have a ground helper. Required gear includes: hard hat (protects from falling objects), safety harness (prevents falls), proper footwear, and two-way radio. Maintain 100% tie-off at all times. Power lines are extremely dangerous - maintain clearance of at least antenna height + 10 feet. Assume ALL wires are energized.",
+          "keyFacts": [
+            "Never climb alone - ground helper required",
+            "Always use BOTH hard hat AND safety harness",
+            "Power line clearance: antenna height + 10 feet minimum"
+          ]
+        },
+        {
+          "title": "Lightning Protection",
+          "content": "Lightning arrestors at the antenna feed point and proper grounding reduce damage risk, but nothing provides complete protection. The safest practice is to disconnect antenna feedlines and unplug equipment during electrical storms. Use heavy ground wire (#10 AWG or larger) connected to an 8-foot copper ground rod. Bond all grounds together at a single point.",
+          "keyFacts": [
+            "Disconnect antennas during storms - safest practice",
+            "Lightning arrestors reduce but don't eliminate risk",
+            "Single-point grounding system is essential"
+          ]
+        },
+        {
+          "title": "RF Radiation Safety",
+          "content": "RF radiation is non-ionizing - it causes tissue HEATING, not DNA damage like X-rays. The eyes are most vulnerable because they have poor blood flow to dissipate heat. MPE (Maximum Permissible Exposure) limits vary by frequency - the 30-300 MHz range has the LOWEST (most restrictive) limits. Duty cycle matters: a 100W transmitter at 50% duty cycle = 50W average power for MPE calculations.",
+          "keyFacts": [
+            "RF causes heating (non-ionizing) - eyes most vulnerable",
+            "30-300 MHz has the most restrictive MPE limits",
+            "Reduce exposure: lower power, more distance, higher antenna, lower duty cycle"
+          ]
+        }
+      ],
+      "examTip": "The three critical numbers: 100mA can kill, 30-300 MHz is most restrictive, and GFCI protects people while fuses protect equipment.",
+      "questionCount": 35
+    },
+    {
+      "id": "T1",
+      "title": "FCC Rules",
+      "subtitle": "Licensing, Privileges & Regulations",
+      "icon": "📜",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Licensing Basics",
+          "content": "Part 97 of FCC Rules governs amateur radio in the United States. Three license classes are currently issued: Technician, General, and Amateur Extra. Your license is valid for 10 years. After expiration, you have a 2-year grace period to renew - but you CANNOT transmit during the grace period! You can begin transmitting as soon as your license appears in the FCC database (no waiting for the paper copy).",
+          "keyFacts": [
+            "License valid for 10 years",
+            "2-year grace period, but NO transmitting while expired",
+            "Can transmit as soon as license appears in FCC database"
+          ]
+        },
+        {
+          "title": "Technician Privileges",
+          "content": "Technicians get FULL privileges on VHF/UHF bands (6 meters, 2 meters, 1.25 meters, 70 cm). On HF, Technicians have limited voice privileges on 10 meters only: 28.300-28.500 MHz with 200 watts PEP maximum. Above 30 MHz, maximum power is 1500 watts PEP. CW (Morse code) is allowed on additional frequencies.",
+          "keyFacts": [
+            "Full VHF/UHF privileges (6m, 2m, 1.25m, 70cm)",
+            "Limited HF: 10 meters only (28.3-28.5 MHz), 200W max",
+            "Above 30 MHz: 1500W max"
+          ]
+        },
+        {
+          "title": "Station Identification",
+          "content": "You must identify your station at the END of each contact AND every 10 MINUTES during a contact. Use English or CW (Morse code) for identification. You may use tactical callsigns like 'Net Control' during operation, but you must still give your FCC callsign per the rules. You can add self-assigned indicators like '/mobile' or '/portable'.",
+          "keyFacts": [
+            "ID at end of contact AND every 10 minutes during",
+            "Use English or CW",
+            "Tactical calls OK, but still must give FCC callsign"
+          ]
+        },
+        {
+          "title": "Prohibited Activities",
+          "content": "Several things are NOT allowed on amateur radio: obscene or indecent language, broadcasting (one-way transmissions to the general public), encryption (except for satellite/RC control commands), music (except incidental to manned spacecraft retransmission), and receiving payment for operating (except when teaching at an educational institution).",
+          "keyFacts": [
+            "No obscene language, broadcasting, or encryption",
+            "No music (with rare exceptions)",
+            "No payment for operating (except teaching)"
+          ]
+        },
+        {
+          "title": "Control Operator & Interference",
+          "content": "Every amateur station must have a licensed control operator. The control operator is responsible for proper operation of the station. If you operate someone else's station, your privileges are limited to YOUR license class, not theirs. Willful interference is NEVER permitted under any circumstances. Keep your email address updated with the FCC or risk license suspension!",
+          "keyFacts": [
+            "Control operator always required and responsible",
+            "Your privileges limited to YOUR license class",
+            "Willful interference is NEVER permitted",
+            "Keep email updated with FCC!"
+          ]
+        }
+      ],
+      "examTip": "Key numbers: 10 years license, 2-year grace (no TX), 200W on HF, 1500W on VHF+. And willful interference is NEVER allowed!",
+      "questionCount": 45
+    },
+    {
+      "id": "T2",
+      "title": "Operating Procedures",
+      "subtitle": "Repeaters, Nets & Emergency Comms",
+      "icon": "📻",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Repeater Basics",
+          "content": "Repeaters extend your range by receiving your signal and retransmitting it at higher power from a better location. You transmit on the repeater's INPUT and listen on its OUTPUT. The difference is called the OFFSET. Standard offsets: 2 meters = ±600 kHz, 70 cm = ±5 MHz. Many repeaters require a CTCSS tone (also called PL tone) - a sub-audible tone that opens the repeater's squelch.",
+          "keyFacts": [
+            "2 meter offset: ±600 kHz",
+            "70 cm offset: ±5 MHz",
+            "CTCSS/PL tone often required for access"
+          ]
+        },
+        {
+          "title": "Simplex & Calling Frequencies",
+          "content": "Simplex means transmitting and receiving on the SAME frequency (no repeater). The national 2-meter FM simplex calling frequency is 146.520 MHz - memorize this! Use simplex when you can communicate directly - it leaves repeaters available for those who need them. The 'reverse' function on your radio lets you listen to the repeater's input to check if a station can reach it directly.",
+          "keyFacts": [
+            "National 2m FM simplex calling: 146.520 MHz",
+            "Simplex = same frequency TX and RX",
+            "Use simplex when possible to free up repeaters"
+          ]
+        },
+        {
+          "title": "Making Contacts",
+          "content": "Before calling CQ (calling any station), LISTEN first to make sure the frequency is clear, then ask 'Is this frequency in use?' To call a specific station, say their callsign followed by yours: 'W1ABC, this is KB6NU.' When responding to a CQ, give your callsign followed by theirs. Q signals: QRM means interference from other stations, QSY means changing frequency.",
+          "keyFacts": [
+            "Listen first, ask if frequency in use, then call",
+            "QRM = interference, QSY = changing frequency",
+            "Always identify with your callsign"
+          ]
+        },
+        {
+          "title": "Digital Repeaters (DMR)",
+          "content": "DMR (Digital Mobile Radio) uses 'talkgroups' - think of them as separate chat rooms on one repeater. You program your radio with a 'code plug' containing talkgroup IDs. You must also set the correct 'color code' (0-15) - similar to CTCSS tones for analog repeaters. DMR uses two time slots per frequency, doubling capacity.",
+          "keyFacts": [
+            "Talkgroups = virtual channels on DMR",
+            "Color code must match repeater",
+            "Code plug = radio configuration file"
+          ]
+        },
+        {
+          "title": "Emergency Communications",
+          "content": "ARES (Amateur Radio Emergency Service) is a volunteer organization. RACES (Radio Amateur Civil Emergency Service) operates under government authority during emergencies. Important: FCC rules ALWAYS apply, even during emergencies - there's no exemption. The ONLY exception is when there's immediate safety of life or protection of property, you may briefly operate outside your privileges.",
+          "keyFacts": [
+            "ARES = volunteer, RACES = government-directed",
+            "FCC rules always apply, even in emergencies",
+            "Life safety exception exists for immediate emergencies"
+          ]
+        },
+        {
+          "title": "Net Operations",
+          "content": "A net is an organized on-air meeting. The Net Control Station (NCS) directs all traffic - transmit only when called upon (except in emergencies). 'Traffic' means messages being passed. Good traffic handling means passing messages EXACTLY as received - don't interpret, edit, or add to them. Use the phonetic alphabet to spell unusual words clearly.",
+          "keyFacts": [
+            "NCS directs traffic - wait to be called",
+            "Pass messages EXACTLY as received",
+            "Use phonetic alphabet for clarity"
+          ]
+        }
+      ],
+      "examTip": "Memorize: 146.520 MHz (2m simplex), 600 kHz (2m offset), 5 MHz (70cm offset). ARES=volunteer, RACES=government.",
+      "questionCount": 40
+    },
+    {
+      "id": "T3",
+      "title": "Radio Wave Propagation",
+      "subtitle": "How Signals Travel",
+      "icon": "🌊",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Radio Wave Fundamentals",
+          "content": "Radio waves are electromagnetic waves with two components: an electric field and a magnetic field traveling at RIGHT ANGLES to each other. They travel at the speed of light: 300,000,000 meters per second (300 million m/s). Polarization is defined by the orientation of the ELECTRIC field.",
+          "keyFacts": [
+            "Electric + magnetic fields at right angles",
+            "Speed: 300,000,000 m/s (speed of light)",
+            "Polarization = orientation of electric field"
+          ]
+        },
+        {
+          "title": "Wavelength & Frequency",
+          "content": "Wavelength and frequency have an inverse relationship - higher frequency means shorter wavelength. The formula: Wavelength (meters) = 300 ÷ Frequency (MHz). Example: 146 MHz → 300 ÷ 146 = 2.05 meters (that's why it's called the '2 meter band'). Frequency ranges: HF = 3-30 MHz, VHF = 30-300 MHz, UHF = 300-3000 MHz.",
+          "keyFacts": [
+            "Formula: λ (meters) = 300 ÷ frequency (MHz)",
+            "HF: 3-30 MHz, VHF: 30-300 MHz, UHF: 300-3000 MHz",
+            "2m band = ~146 MHz, 70cm band = ~440 MHz"
+          ]
+        },
+        {
+          "title": "Line of Sight & VHF/UHF",
+          "content": "VHF/UHF signals travel mostly in straight lines (line-of-sight). They're blocked by Earth's curvature and don't bend around obstacles well. However, the radio horizon extends FARTHER than the visual horizon because the atmosphere slightly refracts (bends) radio waves. Higher antenna = greater range. Trees and vegetation ABSORB UHF and microwave signals.",
+          "keyFacts": [
+            "VHF/UHF = mostly line-of-sight",
+            "Radio horizon > visual horizon (atmospheric refraction)",
+            "Higher antenna = greater range"
+          ]
+        },
+        {
+          "title": "Multipath & Polarization",
+          "content": "Multipath occurs when signals arrive via multiple paths (direct + reflected), causing them to reinforce or cancel each other. Moving your antenna just a few feet can cause BIG signal changes. 'Picket fencing' is the rapid flutter heard on mobile VHF/UHF signals caused by multipath. For best results, both stations should use the SAME polarization: FM repeaters use VERTICAL, SSB/CW weak signal work uses HORIZONTAL.",
+          "keyFacts": [
+            "Picket fencing = multipath flutter on mobile signals",
+            "FM repeaters: VERTICAL polarization",
+            "SSB/CW weak signal: HORIZONTAL polarization"
+          ]
+        },
+        {
+          "title": "Special Propagation Modes",
+          "content": "Tropospheric ducting enables 300+ mile VHF/UHF contacts during temperature inversions. Sporadic E creates random ionization in the E layer, allowing short skip on 6m and 10m bands. Meteor scatter bounces signals off ionized meteor trails - works best on 6 METERS. Auroral backscatter reflects signals from the aurora (signals are distorted). Rain/snow decreases microwave range but has little effect on 10m and 6m.",
+          "keyFacts": [
+            "Tropospheric ducting: 300+ mile VHF/UHF (temperature inversions)",
+            "Meteor scatter: best on 6 METERS",
+            "Sporadic E: short skip on 6m and 10m"
+          ]
+        },
+        {
+          "title": "HF Ionospheric Propagation",
+          "content": "The ionosphere (50-600 miles up) can refract HF signals back to Earth, enabling worldwide communication. VHF/UHF mostly passes through the ionosphere. Sunspots affect propagation - more sunspots = more ionization = better propagation on higher HF bands (6m, 10m). Best time for 10m DX: dawn to shortly after sunset during high sunspot activity.",
+          "keyFacts": [
+            "HF bounces off ionosphere for long-distance",
+            "VHF/UHF passes through (mostly line-of-sight)",
+            "More sunspots = better 10m/6m propagation"
+          ]
+        }
+      ],
+      "examTip": "Key formula: λ = 300/MHz. Meteor scatter = 6 meters. VHF/UHF = line-of-sight. 30-300 MHz = VHF range.",
+      "questionCount": 40
+    },
+    {
+      "id": "T4",
+      "title": "Amateur Radio Practices",
+      "subtitle": "Station Setup & Controls",
+      "icon": "🎛️",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Computer Interfaces",
+          "content": "A sound card interface (like SignaLink or RigBlaster) connects your computer to your radio for digital modes like FT8, PSK31, etc. It provides: audio IN (from radio receiver), audio OUT (to radio transmitter), and PTT control (push-to-talk switching). This allows your computer software to send and receive data through your radio.",
+          "keyFacts": [
+            "Sound card interface connects computer to radio",
+            "Provides audio in/out plus PTT control",
+            "Required for digital modes (FT8, PSK31, etc.)"
+          ]
+        },
+        {
+          "title": "SWR Meters & Measurement",
+          "content": "An SWR meter connects BETWEEN the transceiver and antenna (in the feedline). It measures the ratio of forward power to reflected power, showing how well your antenna system is matched. SWR of 1:1 = perfect match (all power to antenna). Higher SWR means power is being reflected back to your transmitter, which can cause damage and reduced performance.",
+          "keyFacts": [
+            "SWR meter goes BETWEEN radio and antenna",
+            "1:1 SWR = perfect match",
+            "High SWR = power reflected, possible damage"
+          ]
+        },
+        {
+          "title": "Squelch & Noise Control",
+          "content": "Squelch MUTES the receiver when no signal is present - it silences the annoying background hiss. Set it by turning squelch all the way down (hear noise), then slowly increasing until the noise just stops. If squelch is too tight, you'll miss weak signals. Types: carrier squelch (any signal opens it), tone squelch/CTCSS (only matching tone opens it).",
+          "keyFacts": [
+            "Squelch mutes receiver when no signal present",
+            "Set just above noise threshold",
+            "Too tight = miss weak signals"
+          ]
+        },
+        {
+          "title": "RIT & Tuning Controls",
+          "content": "RIT (Receiver Incremental Tuning) adjusts your RECEIVE frequency WITHOUT changing your transmit frequency. Use it when another station is slightly off frequency - you can tune them in while keeping your transmit frequency where others expect it. Remember: RIT = Receive changes only, Transmit stays the same.",
+          "keyFacts": [
+            "RIT = Receive changes, Transmit stays same",
+            "Use when other station is slightly off frequency",
+            "Fine-tune receive without affecting transmit"
+          ]
+        },
+        {
+          "title": "VOX & Hands-Free Operation",
+          "content": "VOX (Voice Operated Transmit) automatically switches to transmit when you speak into the microphone - no need to press the PTT button. Great for contesting, taking notes, or mobile operation. VOX delay controls how long the radio stays in transmit after you stop speaking. Anti-VOX prevents your speaker audio from triggering transmit.",
+          "keyFacts": [
+            "VOX = automatic voice-activated transmit",
+            "Hands-free operation",
+            "VOX delay = time before returning to receive"
+          ]
+        },
+        {
+          "title": "Filters, VFOs & Split Operation",
+          "content": "Narrower filter bandwidth means less interference from adjacent signals (but also less audio fidelity). Dual VFO lets you monitor TWO frequencies simultaneously. Split operation means transmit and receive on DIFFERENT frequencies - common for DX pileups where the DX station says 'listening up 5' (meaning transmit 5 kHz higher than their frequency).",
+          "keyFacts": [
+            "Narrower filter = less interference",
+            "Dual VFO = monitor two frequencies",
+            "Split = TX and RX on different frequencies"
+          ]
+        },
+        {
+          "title": "Antenna Tuner",
+          "content": "An antenna tuner (coupler) matches your antenna system to your transceiver so the transmitter sees the proper load. Important: it does NOT fix antenna or feedline problems - it only masks them from the transmitter. Losses still exist in the antenna system. Always use minimum power necessary for communication (FCC rule).",
+          "keyFacts": [
+            "Matches antenna system to transceiver",
+            "Does NOT fix antenna problems - only masks them",
+            "Use minimum power necessary"
+          ]
+        }
+      ],
+      "examTip": "RIT = Receive only changes. SWR meter goes BETWEEN radio and antenna. VOX = voice-activated transmit.",
+      "questionCount": 35
+    },
+    {
+      "id": "T5",
+      "title": "Electrical Principles",
+      "subtitle": "Ohm's Law, Power & Math",
+      "icon": "🔌",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Voltage, Current & Resistance",
+          "content": "Think of electricity like water in a pipe. VOLTAGE (E) is the pressure pushing electrons - measured in Volts. CURRENT (I) is the flow rate of electrons - measured in Amperes (Amps). RESISTANCE (R) is opposition to flow (like a narrow pipe section) - measured in Ohms. These three are related by Ohm's Law.",
+          "keyFacts": [
+            "Voltage (E) = pressure, measured in Volts",
+            "Current (I) = flow, measured in Amperes",
+            "Resistance (R) = opposition, measured in Ohms"
+          ]
+        },
+        {
+          "title": "Ohm's Law",
+          "content": "The fundamental formula: E = I × R (Voltage = Current × Resistance). Rearranged: I = E/R (to find current) or R = E/I (to find resistance). Example: 12V across 4 ohms = 12÷4 = 3 Amps. Important: always convert milliamps (mA) to Amps before calculating (divide by 1000).",
+          "keyFacts": [
+            "E = I × R (Voltage = Current × Resistance)",
+            "I = E/R, R = E/I (rearrangements)",
+            "Convert mA to A before calculating (÷1000)"
+          ]
+        },
+        {
+          "title": "Power Calculations",
+          "content": "Power formula: P = I × E (Power = Current × Voltage). Remember 'PIE'! Power is measured in Watts. Rearranged: I = P/E (to find current) or E = P/I (to find voltage). Combined formulas: P = E²/R or P = I²×R. Example: 13.8V × 10A = 138 Watts.",
+          "keyFacts": [
+            "P = I × E (think 'PIE')",
+            "Power measured in Watts",
+            "Also: P = E²/R and P = I²×R"
+          ]
+        },
+        {
+          "title": "Metric Prefixes",
+          "content": "Large numbers: Giga (G) = billion (1,000,000,000), Mega (M) = million (1,000,000), kilo (k) = thousand (1,000). Small numbers: milli (m) = 1/1,000, micro (μ) = 1/1,000,000, pico (p) = 1/1,000,000,000,000. Move the decimal 3 places for each prefix step. Example: 28,400 kHz = 28.4 MHz.",
+          "keyFacts": [
+            "Mega (M) = million, kilo (k) = thousand",
+            "milli (m) = 1/1000, micro (μ) = 1/million",
+            "Move decimal 3 places per prefix step"
+          ]
+        },
+        {
+          "title": "Conductors & Insulators",
+          "content": "CONDUCTORS have LOW resistance - electrons flow easily. Good conductors: copper, aluminum (used for wires). INSULATORS have HIGH resistance - they block electron flow. Good insulators: glass, rubber, plastic (used for wire coatings). DC (Direct Current) flows in one direction. AC (Alternating Current) reverses direction periodically (wall outlets = 60 Hz AC).",
+          "keyFacts": [
+            "Conductors: copper, aluminum (low resistance)",
+            "Insulators: glass, rubber, plastic (high resistance)",
+            "DC = one direction, AC = alternates"
+          ]
+        },
+        {
+          "title": "Decibels",
+          "content": "Decibels (dB) are a logarithmic way to express power ratios. Key values to memorize: +3 dB = DOUBLE the power, -3 dB = HALF the power, +10 dB = TEN times the power. So +6 dB = 4× power (double twice). Standard amateur radio impedance is 50 ohms.",
+          "keyFacts": [
+            "+3 dB = double power, -3 dB = half power",
+            "+10 dB = 10× power",
+            "Standard impedance: 50 ohms"
+          ]
+        }
+      ],
+      "examTip": "Memorize: E=IR and P=IE (PIE). +3dB = 2× power, +10dB = 10× power. Standard impedance = 50 ohms.",
+      "questionCount": 45
+    },
+    {
+      "id": "T6",
+      "title": "Electronic Components",
+      "subtitle": "Resistors, Capacitors, Semiconductors",
+      "icon": "🔧",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Resistors",
+          "content": "A resistor OPPOSES current flow - like a narrow section in a pipe. Measured in Ohms. Types include fixed (set value) and variable (adjustable). A potentiometer is a variable resistor used for volume controls, etc. Resistors have power (wattage) ratings - exceed the rating and they'll overheat and possibly catch fire! Color bands indicate resistance value.",
+          "keyFacts": [
+            "Resistor opposes current flow",
+            "Measured in Ohms",
+            "Potentiometer = variable resistor"
+          ]
+        },
+        {
+          "title": "Capacitors",
+          "content": "A capacitor stores energy in an ELECTRIC FIELD between two conductive plates. Measured in Farads (usually microfarads μF or picofarads pF). Key behavior: capacitors BLOCK DC but PASS AC. They charge up to DC voltage then stop current, but AC constantly changes so current flows. Electrolytic capacitors are polarized - connect backwards and they can explode!",
+          "keyFacts": [
+            "Stores energy in electric field",
+            "Blocks DC, passes AC",
+            "Measured in Farads (μF, pF)"
+          ]
+        },
+        {
+          "title": "Inductors",
+          "content": "An inductor (coil of wire) stores energy in a MAGNETIC FIELD. Measured in Henrys (usually millihenrys mH or microhenrys μH). Key behavior: inductors BLOCK AC (high frequencies) but PASS DC. They're the OPPOSITE of capacitors! Used in RF chokes, filters, and transformers. A transformer is two coupled inductors that step voltage up or down.",
+          "keyFacts": [
+            "Stores energy in magnetic field",
+            "Blocks AC, passes DC (opposite of capacitor!)",
+            "Measured in Henrys (mH, μH)"
+          ]
+        },
+        {
+          "title": "Diodes",
+          "content": "A diode allows current to flow in ONE direction only - like a one-way valve. Has an anode (+) and cathode (-). Forward bias = current flows (positive to anode). Main use: rectifiers that convert AC to DC. LED (Light Emitting Diode) emits light when current flows. Zener diode maintains constant voltage (voltage regulator).",
+          "keyFacts": [
+            "Allows current in ONE direction only",
+            "Rectifier use: converts AC to DC",
+            "LED = emits light, Zener = voltage regulator"
+          ]
+        },
+        {
+          "title": "Transistors",
+          "content": "A transistor can AMPLIFY signals or act as a SWITCH. Small input controls large output. Two main types: BJT (Bipolar Junction Transistor) has Base, Collector, Emitter - small base current controls large collector-emitter current. FET (Field Effect Transistor) has Gate, Drain, Source - gate voltage controls drain-source current. BJT = current-controlled, FET = voltage-controlled.",
+          "keyFacts": [
+            "Amplifies or switches",
+            "BJT terminals: Base, Collector, Emitter",
+            "FET terminals: Gate, Drain, Source"
+          ]
+        },
+        {
+          "title": "Integrated Circuits",
+          "content": "An IC (Integrated Circuit) contains many components on a SINGLE semiconductor chip - can have millions of transistors! Types include analog (op-amps), digital (microprocessors), and mixed-signal. Voltage regulator ICs (like 7805 = 5V, 7812 = 12V) maintain constant output voltage. ICs are sensitive to static discharge (ESD) - use anti-static precautions when handling.",
+          "keyFacts": [
+            "Many components on one chip",
+            "78xx series: voltage regulators (7805=5V)",
+            "Sensitive to static discharge (ESD)"
+          ]
+        }
+      ],
+      "examTip": "Capacitor blocks DC/passes AC. Inductor blocks AC/passes DC - they're OPPOSITES! BJT = B/C/E, FET = G/D/S.",
+      "questionCount": 45
+    },
+    {
+      "id": "T7",
+      "title": "Practical Circuits",
+      "subtitle": "Equipment & Troubleshooting",
+      "icon": "🔬",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Receivers & Transmitters",
+          "content": "A transceiver combines transmitter and receiver in one unit. Key receiver specs: Sensitivity = ability to detect WEAK signals, Selectivity = ability to REJECT adjacent signals (discriminate between signals). Most modern amateur radios use the superheterodyne design, where a mixer converts the incoming RF to a fixed IF (Intermediate Frequency) for processing.",
+          "keyFacts": [
+            "Transceiver = transmitter + receiver combined",
+            "Sensitivity = weak signal detection",
+            "Selectivity = adjacent signal rejection"
+          ]
+        },
+        {
+          "title": "Software Defined Radio (SDR)",
+          "content": "SDR uses SOFTWARE to perform functions traditionally done in hardware - filtering, modulation, demodulation, mixing. Advantages include flexibility (software updates), multiple modes with same hardware, wideband reception, and visual spectrum displays. A DMR hotspot connects a digital radio to the internet for worldwide access to DMR networks.",
+          "keyFacts": [
+            "Software processes signals instead of hardware",
+            "Flexible, updatable, visual spectrum display",
+            "DMR hotspot = internet gateway for digital"
+          ]
+        },
+        {
+          "title": "Common Problems",
+          "content": "Overmodulation (mic gain too high) causes distorted audio and 'splatter' on adjacent frequencies. RF feedback happens when RF gets into audio circuits - fix with better grounding and ferrite chokes. Fundamental overload is interference from very strong nearby signals overwhelming the receiver. Low battery in handhelds causes reduced power and distorted audio.",
+          "keyFacts": [
+            "Overmodulation = distortion + splatter",
+            "RF feedback: fix with grounding, ferrite chokes",
+            "Fundamental overload = strong nearby signal"
+          ]
+        },
+        {
+          "title": "Interference Solutions",
+          "content": "RFI (Radio Frequency Interference) to home electronics is often fixed with FERRITE CHOKES (snap-on ferrites) on device cables - they block RF picked up by wiring. A LOW-PASS FILTER between transmitter and antenna reduces harmonic radiation that can interfere with other services. Harmonics are multiples of your fundamental frequency (7 MHz → 14 MHz 2nd harmonic → 21 MHz 3rd harmonic).",
+          "keyFacts": [
+            "Ferrite chokes on cables block RFI",
+            "Low-pass filter reduces harmonics",
+            "Harmonics = multiples of fundamental frequency"
+          ]
+        },
+        {
+          "title": "Test Equipment",
+          "content": "Multimeter measures voltage, current, and resistance - essential for troubleshooting. Oscilloscope shows signal waveforms visually - checks modulation, finds distortion. Frequency counter precisely measures frequency. SWR meter shows how well antenna is matched (1:1 = perfect). Antenna analyzer measures SWR and impedance WITHOUT transmitting - safer for testing.",
+          "keyFacts": [
+            "Multimeter: voltage, current, resistance",
+            "Oscilloscope: shows waveforms",
+            "Antenna analyzer: SWR without transmitting"
+          ]
+        },
+        {
+          "title": "SWR & Dummy Loads",
+          "content": "SWR (Standing Wave Ratio) measures impedance match quality. 1:1 = perfect match (all power to antenna), below 2:1 = acceptable, above 3:1 = concerning (significant reflected power, possible damage). A dummy load is a 50Ω NON-INDUCTIVE resistor that dissipates RF as heat - use for testing transmitters without radiating a signal.",
+          "keyFacts": [
+            "SWR 1:1 = perfect, <2:1 acceptable, >3:1 bad",
+            "Dummy load = 50Ω resistor for testing",
+            "Non-inductive to work at RF frequencies"
+          ]
+        }
+      ],
+      "examTip": "SWR 1:1 is perfect. Ferrite chokes solve RFI. Sensitivity = weak signals, Selectivity = adjacent signals.",
+      "questionCount": 40
+    },
+    {
+      "id": "T8",
+      "title": "Signals & Emissions",
+      "subtitle": "Modulation, Digital & Satellites",
+      "icon": "📡",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Modulation Types",
+          "content": "FM (Frequency Modulation): voice varies the FREQUENCY of the carrier. Wider bandwidth (~15 kHz) but better noise immunity. Used on VHF/UHF. SSB (Single Sideband): most efficient for voice, narrow bandwidth (~2.8 kHz), no carrier transmitted. Preferred for HF long-distance. CW (Morse Code): on/off keying, NARROWEST bandwidth (~150 Hz), most efficient mode.",
+          "keyFacts": [
+            "FM: varies frequency, ~15 kHz bandwidth",
+            "SSB: most efficient voice, ~2.8 kHz bandwidth",
+            "CW: narrowest at ~150 Hz"
+          ]
+        },
+        {
+          "title": "Bandwidth Comparison",
+          "content": "From narrowest to widest: CW (~150 Hz) → FT8 (~50 Hz!) → RTTY (~250 Hz) → SSB (~2.8 kHz) → AM (~6 kHz) → FM (~15 kHz). FT8 is incredibly narrow - only 50 Hz bandwidth! This allows it to work with very weak signals, even 20 dB below the noise floor.",
+          "keyFacts": [
+            "CW narrowest (~150 Hz), FM widest (~15 kHz)",
+            "FT8 only 50 Hz bandwidth!",
+            "Narrower = more efficient, less interference"
+          ]
+        },
+        {
+          "title": "Digital Modes",
+          "content": "FT8: Popular weak-signal digital mode with 15-second transmit/receive cycles. Only 50 Hz bandwidth, works with signals buried in noise. APRS (Automatic Packet Reporting System): combines packet radio with GPS for position reporting. Uses 144.390 MHz in North America. Winlink: email via radio - critical for emergency communications.",
+          "keyFacts": [
+            "FT8: 15-second cycles, works below noise floor",
+            "APRS: GPS + packet radio, 144.390 MHz",
+            "Winlink: email via radio for emergencies"
+          ]
+        },
+        {
+          "title": "Amateur Satellites",
+          "content": "Most amateur satellites are LEO (Low Earth Orbit) - 100-1200 miles up with short pass times (10-20 minutes). Uplink = frequency TO the satellite, Downlink = frequency FROM the satellite. Doppler shift: frequency appears higher as satellite approaches, lower as it recedes - must adjust frequencies during a pass.",
+          "keyFacts": [
+            "LEO satellites: short pass times (10-20 min)",
+            "Uplink = to satellite, Downlink = from satellite",
+            "Doppler shift requires frequency adjustment"
+          ]
+        },
+        {
+          "title": "Satellite Operating",
+          "content": "Use MINIMUM power necessary - satellites have sensitive receivers and you don't want to capture the whole transponder. Listen first to find your own downlink signal before calling. Full duplex operation lets you hear yourself through the satellite. Keep transmissions brief - many stations share limited pass time. Directional antennas (Yagi) greatly improve performance.",
+          "keyFacts": [
+            "Use minimum power - satellites are sensitive",
+            "Listen first, find your downlink",
+            "Keep transmissions brief - share the pass"
+          ]
+        },
+        {
+          "title": "Station Setup for Digital",
+          "content": "Digital modes need: a sound card interface (connects radio audio to computer), software for the mode you want to use, and accurate computer clock (essential for FT8). CAT (Computer Aided Transceiver) control lets software control the radio. Watch audio levels carefully - too high causes distortion and splatter.",
+          "keyFacts": [
+            "Sound card interface required",
+            "Accurate computer time essential for FT8",
+            "Proper audio levels prevent distortion"
+          ]
+        }
+      ],
+      "examTip": "Bandwidth order: CW (narrowest) → SSB → FM (widest). FT8 = 50 Hz, 15-second cycles. APRS = 144.390 MHz.",
+      "questionCount": 40
+    },
+    {
+      "id": "T9",
+      "title": "Antennas & Feed Lines",
+      "subtitle": "Antenna Types, Coax & Connectors",
+      "icon": "📶",
+      "estimatedMinutes": 5,
+      "sections": [
+        {
+          "title": "Dipole Antennas",
+          "content": "The half-wave dipole is the fundamental antenna. Length formula: Length (feet) = 468 ÷ Frequency (MHz). Example: 468 ÷ 7.15 MHz = 65.5 feet for 40m band. Characteristics: ~73 ohms impedance at center feed point, bidirectional radiation pattern (figure-8), horizontal polarization. Simple to build and very effective!",
+          "keyFacts": [
+            "Length (feet) = 468 ÷ frequency (MHz)",
+            "~73Ω impedance at center",
+            "Bidirectional pattern, horizontal polarization"
+          ]
+        },
+        {
+          "title": "Vertical Antennas",
+          "content": "Vertical antennas produce VERTICAL polarization and have an OMNIDIRECTIONAL pattern (360° in horizontal plane). Quarter-wave vertical has ~36Ω impedance. 5/8-wave vertical has MORE GAIN than 1/4-wave - better for VHF/UHF mobile because of lower radiation angle. Verticals take less horizontal space and are good for mobile/portable use.",
+          "keyFacts": [
+            "Vertical polarization, omnidirectional pattern",
+            "5/8-wave has more gain than 1/4-wave",
+            "Good for mobile - less horizontal space needed"
+          ]
+        },
+        {
+          "title": "Yagi (Beam) Antennas",
+          "content": "Yagi is a directional gain antenna - must be aimed at the station you want to work. Three element types: REFLECTOR (longest, behind driven element, reflects signal forward), DRIVEN element (connected to feedline, ~1/2 wavelength), DIRECTOR(S) (shortest, in front, directs signal forward). Adding more directors increases gain but narrows the beam.",
+          "keyFacts": [
+            "Reflector = longest, Director = shortest",
+            "Directional - must be aimed",
+            "More directors = more gain, narrower beam"
+          ]
+        },
+        {
+          "title": "Antenna Gain",
+          "content": "Antenna gain is measured in dBi (vs isotropic - theoretical point source) or dBd (vs dipole). Conversion: dBi = dBd + 2.15. A dipole has 2.15 dBi gain (0 dBd by definition). A 3-element Yagi might have 7 dBi gain. Higher gain means energy is concentrated in a narrower beam - you're not creating power, just focusing it.",
+          "keyFacts": [
+            "dBi = gain vs isotropic, dBd = gain vs dipole",
+            "dBi = dBd + 2.15",
+            "Higher gain = narrower beam (focused energy)"
+          ]
+        },
+        {
+          "title": "Coaxial Cable",
+          "content": "Coax has a center conductor, dielectric insulator, shield/braid, and outer jacket. Common types: RG-213/RG-8 = low loss (thick, good for long runs), RG-58 = higher loss (thin, flexible, short runs only). Feed line loss INCREASES with higher frequency and longer cable length. Protect outdoor coax from UV damage.",
+          "keyFacts": [
+            "RG-213: low loss (thick), RG-58: higher loss (thin)",
+            "Loss increases with frequency and length",
+            "Protect from UV damage outdoors"
+          ]
+        },
+        {
+          "title": "Connectors & SWR",
+          "content": "Common connectors: PL-259/SO-239 (standard for HF, not weatherproof - seal outdoors), Type N (better for VHF/UHF, weatherproof, lower loss), BNC (quick-connect, common on handhelds), SMA (small, common on HTs). SWR: 1:1 = perfect match, below 2:1 = acceptable, above 3:1 = concerning. Match polarization between stations for best signal!",
+          "keyFacts": [
+            "PL-259: HF standard. Type N: VHF/UHF, weatherproof",
+            "SWR: 1:1 perfect, <2:1 acceptable, >3:1 bad",
+            "Match polarization between stations"
+          ]
+        }
+      ],
+      "examTip": "Dipole formula: 468/MHz. Yagi: Reflector=longest, Director=shortest. dBi = dBd + 2.15. PL-259 for HF, Type N for VHF/UHF.",
+      "questionCount": 35
+    }
+  ]
+}

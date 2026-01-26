@@ -1,7 +1,7 @@
 # Ham Radio Technician Exam Study App
 
 ## Overview
-A web-based study application for the FCC Amateur Radio Technician Class license exam. Provides three study modes with progress tracking and analytics.
+A web-based study application for the FCC Amateur Radio Technician Class license exam. Provides guided learning with topic-based lessons, multiple study modes, progress tracking, and analytics.
 
 ## Tech Stack
 - **Framework:** Next.js 16.0.10 with App Router
@@ -14,8 +14,9 @@ A web-based study application for the FCC Amateur Radio Technician Class license
 ham-radio-app/
 ├── my-study-app/              # Next.js application
 │   ├── app/
-│   │   ├── page.tsx           # Main app component (703 lines, monolithic)
+│   │   ├── page.tsx           # Main app component (~1200 lines, monolithic)
 │   │   ├── ham_radio_questions.json  # 411 parsed questions
+│   │   ├── lessons.json       # 10 topic lessons with detailed content
 │   │   ├── layout.tsx         # Root layout
 │   │   └── globals.css        # Tailwind imports
 │   ├── public/                # Static assets
@@ -47,6 +48,15 @@ docker compose up    # Starts on port 3010
 
 ## Application Modes
 
+### Learn Mode (NEW)
+- 10 topic-based lessons (T0-T9)
+- Each lesson has 5-6 sections with detailed content
+- Key facts highlighted for each section
+- Exam tips at end of each lesson
+- "Mark as Completed" tracking
+- Direct "Take Quiz" button to test on that topic
+- Progress bar showing completion status
+
 ### Study Mode
 - All questions (or filtered by subelement)
 - Immediate feedback after each answer
@@ -65,6 +75,15 @@ docker compose up    # Starts on port 3010
 - Study-mode behavior (immediate feedback)
 - Persisted to localStorage
 
+### Review Mode (Spaced Repetition)
+- Automatically resurfaces questions you've missed or need to review
+- Simple algorithm: get a question right 3 times in a row = mastered
+- Wrong answers reset the streak and make questions appear sooner
+- Review intervals increase with each correct answer (immediate → 1 hour → 1 day → 7 days)
+- Shows due count on main menu and per-topic in Learn section
+- Displays mastery progress during review sessions
+- Questions mastered (3 correct streak) no longer appear in reviews
+
 ## Data Model
 
 ### Question Interface
@@ -78,18 +97,50 @@ interface Question {
 }
 ```
 
+### Lesson Interface
+```typescript
+interface LessonSection {
+  title: string;        // Section heading
+  content: string;      // Explanatory text
+  keyFacts: string[];   // Bullet points of key facts
+}
+
+interface Lesson {
+  id: string;           // "T0", "T1", etc.
+  title: string;        // "Safety", "FCC Rules", etc.
+  subtitle: string;     // Brief description
+  icon: string;         // Emoji icon
+  estimatedMinutes: number;  // Reading time (~5 min each)
+  sections: LessonSection[];  // 5-6 sections per lesson
+  examTip: string;      // Key exam tip
+  questionCount: number; // Questions in this topic
+}
+```
+
+### Spaced Repetition Interface
+```typescript
+interface SpacedRepData {
+  questionId: string;
+  correctStreak: number;      // 0-3 (3 = mastered)
+  lastAnswered: number;       // timestamp
+  nextReviewDate: number;     // timestamp when due
+  timesAnswered: number;      // total attempts
+  timesCorrect: number;       // total correct
+}
+```
+
 ### Subelements
-Questions are organized by FCC subelements (T0-T9):
-- T0: Commission's Rules
-- T1: Operating Procedures
-- T2: Radio and Electronic Fundamentals
-- T3: Station Equipment
-- T4: Amateur Radio Practices
-- T5: Electrical Principles
-- T6: Electronic and Electrical Components
-- T7: Station Equipment (continued)
-- T8: Operating Procedures
-- T9: Safety and Emergency
+Questions and lessons are organized by FCC subelements (T0-T9):
+- T0: Safety (Electrical, Antenna & RF Hazards)
+- T1: FCC Rules (Licensing, Privileges & Regulations)
+- T2: Operating Procedures (Repeaters, Nets & Emergency Comms)
+- T3: Radio Wave Propagation (How Signals Travel)
+- T4: Amateur Radio Practices (Station Setup & Controls)
+- T5: Electrical Principles (Ohm's Law, Power & Math)
+- T6: Electronic Components (Resistors, Capacitors, Semiconductors)
+- T7: Practical Circuits (Equipment & Troubleshooting)
+- T8: Signals & Emissions (Modulation, Digital & Satellites)
+- T9: Antennas & Feed Lines (Antenna Types, Coax & Connectors)
 
 ## FCC Exam Facts
 - 35 questions from a pool of 411
@@ -102,15 +153,42 @@ Questions are organized by FCC subelements (T0-T9):
 |------|---------|
 | `my-study-app/app/page.tsx` | Main app logic (all UI + state) |
 | `my-study-app/app/ham_radio_questions.json` | 411 parsed questions |
+| `my-study-app/app/lessons.json` | 10 detailed topic lessons |
 | `generate_complete_json.py` | Primary question parser |
 | `build_questions_json.py` | Alternative parser with different approach |
 
-## Current Limitations
-- **Monolithic architecture:** All 703 lines in single `page.tsx`
-- **No tests:** Zero test coverage
-- **No component library:** Everything is inline Tailwind
-- **Client-side only:** No server components or API routes
+## App States
+The app uses a state machine pattern with these states:
+- `menu` - Main menu with mode selection
+- `learn` - Topic list view (10 lessons)
+- `lesson` - Individual lesson view with sections
+- `quiz` - Question display and answering
+- `results` - Score and performance breakdown
+- `analytics` - Global statistics dashboard
 
 ## localStorage Keys
 - `ham_technician_bookmarks` - Array of bookmarked question IDs
 - `ham_technician_global_stats` - Per-subelement accuracy stats
+- `ham_technician_completed_lessons` - Array of completed lesson IDs
+- `ham_technician_spaced_rep` - Spaced repetition data per question
+
+## Spaced Repetition Algorithm
+Simple system based on correct answer streaks:
+- **Streak 0 (wrong):** Review immediately available
+- **Streak 1:** Review after 1 hour
+- **Streak 2:** Review after 1 day
+- **Streak 3 (mastered):** Review after 7 days, removed from active reviews
+
+Getting a question wrong resets the streak to 0.
+
+## Current Limitations
+- **Monolithic architecture:** All ~1200 lines in single `page.tsx`
+- **No tests:** Zero test coverage
+- **No component library:** Everything is inline Tailwind
+- **Client-side only:** No server components or API routes
+
+## Future Enhancement Ideas
+- Previous/Next lesson navigation
+- Flashcard mode for key facts
+- Study streaks tracking
+- Mobile app (App Store)
