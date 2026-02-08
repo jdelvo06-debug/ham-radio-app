@@ -33,18 +33,30 @@ ham-radio-app/
 ### Local Development
 ```bash
 cd my-study-app
-npm run dev    # Starts on port 3005
+npm run dev    # Starts on port 4000
 ```
 
-### Docker
+### Production (PM2)
 ```bash
 cd my-study-app
-docker compose up    # Starts on port 3010
+npm run build
+pm2 start ecosystem.config.js    # Starts on port 4000
+```
+
+### Mobile Build (Capacitor)
+```bash
+cd my-study-app
+npm run build:mobile    # Generates out/ for Capacitor
+npx cap sync
 ```
 
 ### Key URLs
-- Development: http://localhost:3005
-- Docker: http://localhost:3010
+- Development: http://localhost:4000
+- Production (PM2): http://localhost:4000
+- Network access: http://<your-ip>:4000
+
+### PWA
+The app is installable as a PWA via Chrome "Add to Home Screen" when served in production mode (PM2).
 
 ## Application Modes
 
