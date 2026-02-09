@@ -222,13 +222,13 @@ The Python parsers generate explanations programmatically based on keyword match
 Not all questions have custom explanations - some get generic fallbacks.
 
 ## Port Configuration
-- **Port 3005:** Development server (`npm run dev`)
-- **Port 3010:** Docker container
+- **Port 4000:** Development and production server (PM2)
 - **Port 3000:** Reserved (Open WebUI uses it globally)
 
 Configured in `package.json`:
 ```json
-"dev": "next dev -p 3005"
+"dev": "next dev -p 4000",
+"start": "next start -p 4000"
 ```
 
 ## Weak Areas Analysis
@@ -266,16 +266,28 @@ Each weak area has a "Study" button that:
 
 ## Build & Deploy
 
-### Static Export Works
-This app can be statically exported since:
-- No API routes
-- No server-side data fetching
-- All data bundled in JSON
+### PM2 Production Server
+The app runs via PM2 (`ecosystem.config.js`) on port 4000:
+- `npm run build` (uses `--webpack` flag for PWA compatibility with Next.js 16 Turbopack)
+- `pm2 start ecosystem.config.js`
+- Auto-restarts on crash, logs to `./logs/`
 
-### Docker Notes
-Dockerfile uses multi-stage build:
-1. Build stage: `npm run build`
-2. Production stage: `next start`
+### PWA Support
+The app is a Progressive Web App (installable via Chrome "Add to Home Screen"):
+- `@ducanh2912/next-pwa` generates the service worker
+- Manifest at `public/manifest.webmanifest`
+- Icons at `public/icons/` (7 sizes, .webp format)
+- Service worker disabled in dev mode, active in production
+- Generated files (`sw.js`, `workbox-*.js`) are gitignored
+
+### Mobile Builds (Capacitor)
+Capacitor still works via a separate build script:
+- `npm run build:mobile` exports static files to `out/`
+- `npx cap sync` copies to iOS/Android projects
+
+### Next.js 16 + PWA Gotcha
+`@ducanh2912/next-pwa` uses webpack plugins, but Next.js 16 defaults to Turbopack.
+The build script uses `--webpack` flag to force webpack mode for PWA compatibility.
 
 ## Testing Notes (for future)
 

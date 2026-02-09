@@ -105,21 +105,24 @@ npm install
 ### Running the App
 
 ```bash
-# Development server (http://localhost:3005)
+# Development server (http://localhost:4000)
 npm run dev
 
-# Production build
+# Production with PM2 (http://localhost:4000)
 npm run build
-npm start
+pm2 start ecosystem.config.js
+
+# Mobile build (Capacitor)
+npm run build:mobile
+npx cap sync
 ```
 
-### Docker
+### PWA Install
 
-```bash
-cd my-study-app
-docker compose up
-# Access at http://localhost:3010
-```
+The app is installable as a Progressive Web App. When running in production (PM2):
+- **Android:** Chrome > Menu > "Add to Home Screen"
+- **iPhone:** Safari > Share > "Add to Home Screen"
+- Access from other devices on the same network via `http://<your-ip>:4000`
 
 ## Project Structure
 
@@ -132,8 +135,8 @@ ham-radio-app/
 │   │   ├── lessons.json       # 10 topic lessons
 │   │   ├── layout.tsx         # Root layout
 │   │   └── globals.css        # Tailwind imports
-│   ├── public/                # Static assets
-│   ├── dockerfile             # Docker configuration
+│   ├── public/                # Static assets & PWA icons
+│   ├── ecosystem.config.js    # PM2 process manager config
 │   └── package.json
 ├── *.py                       # Python parsers (6 files)
 ├── raw_questions.txt          # Source FCC question data
