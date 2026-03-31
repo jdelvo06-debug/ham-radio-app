@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getItem, setItem, removeItem } from './lib/storage';
 import questionsData from './ham_radio_questions.json';
 import lessonsData from './lessons.json';
 
@@ -209,75 +210,49 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingSlide, setOnboardingSlide] = useState(0);
 
-  // ---------- LOCALSTORAGE LOAD ----------
+  // ---------- STORAGE LOAD ----------
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const loadData = async () => {
+      try {
+        const savedBookmarks = await getItem(LS_BOOKMARKS_KEY);
+        if (savedBookmarks) setBookmarks(JSON.parse(savedBookmarks));
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedBookmarks = window.localStorage.getItem(LS_BOOKMARKS_KEY);
-      if (savedBookmarks) {
-        setBookmarks(JSON.parse(savedBookmarks));
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const savedStats = await getItem(LS_GLOBAL_STATS_KEY);
+        if (savedStats) setGlobalStats(JSON.parse(savedStats));
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedStats = window.localStorage.getItem(LS_GLOBAL_STATS_KEY);
-      if (savedStats) {
-        setGlobalStats(JSON.parse(savedStats));
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const savedCompletedLessons = await getItem(LS_COMPLETED_LESSONS_KEY);
+        if (savedCompletedLessons) setCompletedLessons(JSON.parse(savedCompletedLessons));
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedCompletedLessons = window.localStorage.getItem(LS_COMPLETED_LESSONS_KEY);
-      if (savedCompletedLessons) {
-        setCompletedLessons(JSON.parse(savedCompletedLessons));
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const savedSpacedRep = await getItem(LS_SPACED_REP_KEY);
+        if (savedSpacedRep) setSpacedRepData(JSON.parse(savedSpacedRep));
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedSpacedRep = window.localStorage.getItem(LS_SPACED_REP_KEY);
-      if (savedSpacedRep) {
-        setSpacedRepData(JSON.parse(savedSpacedRep));
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const savedDarkMode = await getItem(LS_DARK_MODE_KEY);
+        if (savedDarkMode) setDarkMode(JSON.parse(savedDarkMode));
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedDarkMode = window.localStorage.getItem(LS_DARK_MODE_KEY);
-      if (savedDarkMode) {
-        setDarkMode(JSON.parse(savedDarkMode));
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const savedStreak = await getItem(LS_STREAK_KEY);
+        if (savedStreak) {
+          const parsed = JSON.parse(savedStreak);
+          setStreakData(parsed.streakData || { currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
+          setPassedExams(parsed.passedExams || 0);
+        }
+      } catch { /* ignore parse errors */ }
 
-    try {
-      const savedStreak = window.localStorage.getItem(LS_STREAK_KEY);
-      if (savedStreak) {
-        const parsed = JSON.parse(savedStreak);
-        setStreakData(parsed.streakData || { currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
-        setPassedExams(parsed.passedExams || 0);
-      }
-    } catch {
-      // ignore parse errors
-    }
-
-    // Check if onboarding has been completed
-    try {
-      const onboardingComplete = window.localStorage.getItem(LS_ONBOARDING_KEY);
-      if (!onboardingComplete) {
-        setShowOnboarding(true);
-      }
-    } catch {
-      // ignore parse errors
-    }
+      try {
+        const onboardingComplete = await getItem(LS_ONBOARDING_KEY);
+        if (!onboardingComplete) setShowOnboarding(true);
+      } catch { /* ignore parse errors */ }
+    };
+    loadData();
   }, []);
 
   // ---------- HELPERS ----------
@@ -306,7 +281,7 @@ export default function Home() {
       if (prev.includes(id)) return prev;
       const next = [...prev, id];
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(next));
+        setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(next));
       }
       return next;
     });
@@ -354,7 +329,7 @@ export default function Home() {
 
       const next = { ...prev, [questionId]: newData };
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_SPACED_REP_KEY, JSON.stringify(next));
+        setItem(LS_SPACED_REP_KEY, JSON.stringify(next));
       }
       return next;
     });
@@ -422,7 +397,7 @@ export default function Home() {
     setDarkMode((prev) => {
       const next = !prev;
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(next));
+        setItem(LS_DARK_MODE_KEY, JSON.stringify(next));
       }
       return next;
     });
@@ -432,9 +407,7 @@ export default function Home() {
   const completeOnboarding = () => {
     setShowOnboarding(false);
     setOnboardingSlide(0);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(LS_ONBOARDING_KEY, 'true');
-    }
+          setItem(LS_ONBOARDING_KEY, 'true');
   };
 
   // Reset all progress (stats, bookmarks, spaced rep, completed lessons, streaks)
@@ -449,11 +422,11 @@ export default function Home() {
 
     // Clear localStorage
     if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(LS_GLOBAL_STATS_KEY);
-      window.localStorage.removeItem(LS_BOOKMARKS_KEY);
-      window.localStorage.removeItem(LS_SPACED_REP_KEY);
-      window.localStorage.removeItem(LS_COMPLETED_LESSONS_KEY);
-      window.localStorage.removeItem(LS_STREAK_KEY);
+      removeItem(LS_GLOBAL_STATS_KEY);
+      removeItem(LS_BOOKMARKS_KEY);
+      removeItem(LS_SPACED_REP_KEY);
+      removeItem(LS_COMPLETED_LESSONS_KEY);
+      removeItem(LS_STREAK_KEY);
     }
 
     setShowResetConfirm(false);
@@ -504,7 +477,7 @@ export default function Home() {
 
       // Persist
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData: newStreak, passedExams }));
+        setItem(LS_STREAK_KEY, JSON.stringify({ streakData: newStreak, passedExams }));
       }
 
       return newStreak;
@@ -516,7 +489,7 @@ export default function Home() {
     setPassedExams((prev) => {
       const newCount = prev + 1;
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData, passedExams: newCount }));
+        setItem(LS_STREAK_KEY, JSON.stringify({ streakData, passedExams: newCount }));
       }
       return newCount;
     });
@@ -586,29 +559,29 @@ export default function Home() {
         // Import each data type if present
         if (data.globalStats) {
           setGlobalStats(data.globalStats);
-          window.localStorage.setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(data.globalStats));
+          setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(data.globalStats));
         }
         if (data.bookmarks) {
           setBookmarks(data.bookmarks);
-          window.localStorage.setItem(LS_BOOKMARKS_KEY, JSON.stringify(data.bookmarks));
+          setItem(LS_BOOKMARKS_KEY, JSON.stringify(data.bookmarks));
         }
         if (data.completedLessons) {
           setCompletedLessons(data.completedLessons);
-          window.localStorage.setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(data.completedLessons));
+          setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(data.completedLessons));
         }
         if (data.spacedRepData) {
           setSpacedRepData(data.spacedRepData);
-          window.localStorage.setItem(LS_SPACED_REP_KEY, JSON.stringify(data.spacedRepData));
+          setItem(LS_SPACED_REP_KEY, JSON.stringify(data.spacedRepData));
         }
         if (typeof data.darkMode === 'boolean') {
           setDarkMode(data.darkMode);
-          window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(data.darkMode));
+          setItem(LS_DARK_MODE_KEY, JSON.stringify(data.darkMode));
         }
         if (data.streakData) {
           setStreakData(data.streakData);
           const importedPassedExams = data.passedExams || 0;
           setPassedExams(importedPassedExams);
-          window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData: data.streakData, passedExams: importedPassedExams }));
+          setItem(LS_STREAK_KEY, JSON.stringify({ streakData: data.streakData, passedExams: importedPassedExams }));
         }
 
         alert('Progress imported successfully!');
@@ -661,7 +634,7 @@ export default function Home() {
     setBookmarks((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_BOOKMARKS_KEY, JSON.stringify(next));
+        setItem(LS_BOOKMARKS_KEY, JSON.stringify(next));
       }
       return next;
     });
@@ -687,7 +660,7 @@ export default function Home() {
         },
       };
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(next));
+        setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(next));
       }
       return next;
     });

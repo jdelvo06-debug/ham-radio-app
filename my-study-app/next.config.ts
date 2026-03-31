@@ -8,6 +8,11 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  // output: 'export' enables static HTML export for Capacitor/iOS builds.
+  // When building for mobile (build:mobile), this generates a static `out/` dir
+  // that Capacitor serves from the WKWebView.
+  // For web/PWA, use `next build` without this flag (or with NEXT_OUTPUT unset).
+  output: process.env.NEXT_OUTPUT === 'export' ? 'export' : undefined,
   images: {
     unoptimized: true,
   },
