@@ -32,6 +32,9 @@ import QuizView from './components/QuizView';
 import ResultsView from './components/ResultsView';
 import AnalyticsView from './components/AnalyticsView';
 import SettingsView from './components/SettingsView';
+import PaywallModal from './components/PaywallModal';
+import { usePremium } from './hooks/usePremium';
+import { getDailyQuestionsRemaining, incrementDailyCount, resetIfNewDay } from './utils/freeLimit';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('menu');
@@ -74,9 +77,34 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingSlide, setOnboardingSlide] = useState(0);
 
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallTitle, setPaywallTitle] = useState('Unlock Ham Radio Premium');
+  const [paywallMessage, setPaywallMessage] = useState('Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.');
+  const [freeQuestionsRemaining, setFreeQuestionsRemaining] = useState(25);
+
+  const { isPremium, setPremium } = usePremium();
+
+  const syncFreeQuestionCount = () => {
+    resetIfNewDay();
+    setFreeQuestionsRemaining(getDailyQuestionsRemaining());
+  };
+
+  const openPaywall = (
+    title = 'Unlock Ham Radio Premium',
+    message = 'Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.'
+  ) => {
+    setPaywallTitle(title);
+    setPaywallMessage(message);
+    setShowPaywall(true);
+  };
+
+  const closePaywall = () => setShowPaywall(false);
+
   // ---------- LOCALSTORAGE LOAD ----------
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    syncFreeQuestionCount();
 
     try {
       const savedBookmarks = window.localStorage.getItem(LS_BOOKMARKS_KEY);
@@ -130,6 +158,10 @@ export default function Home() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    syncFreeQuestionCount();
+  }, [isPremium]);
+
   // ---------- HELPERS ----------
 
   const getAvailableSubelements = (): string[] => {
@@ -161,6 +193,30 @@ export default function Home() {
   const openLesson = (lesson: Lesson) => {
     setCurrentLesson(lesson);
     setAppState('lesson');
+  };
+
+  const openLearn = () => {
+    if (!isPremium) {
+      openPaywall(
+        'Learn mode is a Premium feature',
+        'Upgrade to Premium to unlock guided lessons, topic-by-topic learning, and full study access before you test.'
+      );
+      return;
+    }
+
+    setAppState('learn');
+  };
+
+  const openAnalytics = () => {
+    if (!isPremium) {
+      openPaywall(
+        'Analytics is a Premium feature',
+        'Upgrade to Premium to see your weak areas, accuracy trends, and smarter study recommendations.'
+      );
+      return;
+    }
+
+    setAppState('analytics');
   };
 
   // ---------- SPACED REPETITION HELPERS ----------
@@ -228,6 +284,14 @@ export default function Home() {
   };
 
   const startReviewMode = (subelement?: string) => {
+    if (!isPremium) {
+      openPaywall(
+        'Review mode is a Premium feature',
+        'Upgrade to Premium to unlock spaced repetition, review due questions, and keep your weak spots from sneaking back in.'
+      );
+      return;
+    }
+
     const dueQuestions = getDueReviewQuestions(subelement);
 
     if (dueQuestions.length === 0) {
@@ -468,7 +532,15 @@ export default function Home() {
 
   const isBookmarked = (id: string): boolean => bookmarks.includes(id);
 
-  const toggleBookmark = (id: string) => {
+  const handleToggleBookmark = (id: string) => {
+    if (!isPremium) {
+      openPaywall(
+        'Bookmarks are a Premium feature',
+        'Upgrade to Premium to save tricky questions, revisit them anytime, and build focused practice sets.'
+      );
+      return;
+    }
+
     setBookmarks((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       if (typeof window !== 'undefined') {
@@ -514,6 +586,32 @@ export default function Home() {
   };
 
   const startQuiz = (selectedMode: Mode) => {
+    if (!isPremium && selectedMode !== 'study') {
+      const featureLabel =
+        selectedMode === 'exam'
+          ? 'Practice exams'
+          : selectedMode === 'bookmarks'
+          ? 'Bookmarks mode'
+          : 'Review mode';
+
+      openPaywall(
+        `${featureLabel} are Premium`,
+        'The free plan includes 25 random practice questions per day in basic Study Mode. Upgrade for unlimited sessions and every study mode.'
+      );
+      return;
+    }
+
+    if (!isPremium && selectedMode === 'study') {
+      syncFreeQuestionCount();
+      if (getDailyQuestionsRemaining() <= 0) {
+        openPaywall(
+          'You\'ve used your 25 free questions for today',
+          'Upgrade to Premium for unlimited questions, or come back tomorrow for another free set of 25 random practice questions.'
+        );
+        return;
+      }
+    }
+
     setMode(selectedMode);
     setAppState('quiz');
     setCurrentQuestionIndex(0);
@@ -581,6 +679,11 @@ export default function Home() {
       updateGlobalStats(currentQ, wasCorrect);
       updateSpacedRepetition(currentQ.id, wasCorrect);
       updateStreak();
+
+      if (!isPremium && mode === 'study') {
+        incrementDailyCount();
+        syncFreeQuestionCount();
+      }
     }
   };
 
@@ -622,6 +725,15 @@ export default function Home() {
 
     const nextIndex = currentQuestionIndex + 1;
 
+    if (!isPremium && mode === 'study' && nextIndex < activeQuestions.length && getDailyQuestionsRemaining() <= 0) {
+      syncFreeQuestionCount();
+      openPaywall(
+        'You\'ve used your 25 free questions for today',
+        'Upgrade to Premium to keep going right now with unlimited questions, or come back tomorrow for another free set.'
+      );
+      return;
+    }
+
     if (nextIndex < activeQuestions.length) {
       setCurrentQuestionIndex(nextIndex);
       setSelectedAnswer(null);
@@ -648,6 +760,12 @@ export default function Home() {
     setAppState('menu');
   };
 
+  const handlePurchase = () => {
+    console.log('IAP purchase triggered — StoreKit integration pending');
+    setPremium(true);
+    closePaywall();
+  };
+
   // Pre-compute derived data for components
   const dueReviewCounts: Record<string, number> = {};
   const masteredCounts: Record<string, number> = {};
@@ -660,10 +778,14 @@ export default function Home() {
 
   // ---------- RENDER ----------
 
+  let content;
+
   if (appState === 'menu') {
-    return (
+    content = (
       <MainMenu
         darkMode={darkMode}
+        isPremium={isPremium}
+        freeQuestionsRemaining={freeQuestionsRemaining}
         streakData={streakData}
         earnedBadges={earnedBadges}
         badgesTotal={BADGES.length}
@@ -678,6 +800,8 @@ export default function Home() {
         masteredCount={getMasteredCount()}
         startQuiz={startQuiz}
         startReviewMode={startReviewMode}
+        openLearn={openLearn}
+        openAnalytics={openAnalytics}
         setAppState={setAppState}
         showOnboarding={showOnboarding}
         onboardingSlide={onboardingSlide}
@@ -685,10 +809,8 @@ export default function Home() {
         completeOnboarding={completeOnboarding}
       />
     );
-  }
-
-  if (appState === 'analytics') {
-    return (
+  } else if (appState === 'analytics') {
+    content = (
       <AnalyticsView
         darkMode={darkMode}
         subelements={subelements}
@@ -699,10 +821,8 @@ export default function Home() {
         setAppState={setAppState}
       />
     );
-  }
-
-  if (appState === 'settings') {
-    return (
+  } else if (appState === 'settings') {
+    content = (
       <SettingsView
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
@@ -722,10 +842,8 @@ export default function Home() {
         replayTutorial={replayTutorial}
       />
     );
-  }
-
-  if (appState === 'learn') {
-    return (
+  } else if (appState === 'learn') {
+    content = (
       <LearnView
         darkMode={darkMode}
         lessons={lessons}
@@ -738,10 +856,8 @@ export default function Home() {
         setAppState={setAppState}
       />
     );
-  }
-
-  if (appState === 'lesson' && currentLesson) {
-    return (
+  } else if (appState === 'lesson' && currentLesson) {
+    content = (
       <LessonView
         darkMode={darkMode}
         currentLesson={currentLesson}
@@ -753,10 +869,8 @@ export default function Home() {
         setAppState={setAppState}
       />
     );
-  }
-
-  if (appState === 'results') {
-    return (
+  } else if (appState === 'results') {
+    content = (
       <ResultsView
         darkMode={darkMode}
         mode={mode}
@@ -766,31 +880,45 @@ export default function Home() {
         subelementStats={subelementStats}
         spacedRepData={spacedRepData}
         isBookmarked={isBookmarked}
-        toggleBookmark={toggleBookmark}
+        toggleBookmark={handleToggleBookmark}
         getDueReviewCount={getDueReviewCount}
         startRetryMissed={startRetryMissed}
         setAppState={setAppState}
       />
     );
+  } else {
+    content = (
+      <QuizView
+        darkMode={darkMode}
+        mode={mode}
+        selectedSubelement={selectedSubelement}
+        activeQuestions={activeQuestions}
+        currentQuestionIndex={currentQuestionIndex}
+        selectedAnswer={selectedAnswer}
+        showExplanation={showExplanation}
+        isBookmarked={isBookmarked}
+        toggleBookmark={handleToggleBookmark}
+        spacedRepData={spacedRepData}
+        handleAnswerClick={handleAnswerClick}
+        handleNextQuestion={handleNextQuestion}
+        isAnswerCorrect={isAnswerCorrect}
+        setAppState={setAppState}
+      />
+    );
   }
 
-  // Quiz state (default)
   return (
-    <QuizView
-      darkMode={darkMode}
-      mode={mode}
-      selectedSubelement={selectedSubelement}
-      activeQuestions={activeQuestions}
-      currentQuestionIndex={currentQuestionIndex}
-      selectedAnswer={selectedAnswer}
-      showExplanation={showExplanation}
-      isBookmarked={isBookmarked}
-      toggleBookmark={toggleBookmark}
-      spacedRepData={spacedRepData}
-      handleAnswerClick={handleAnswerClick}
-      handleNextQuestion={handleNextQuestion}
-      isAnswerCorrect={isAnswerCorrect}
-      setAppState={setAppState}
-    />
+    <>
+      {content}
+      {showPaywall && (
+        <PaywallModal
+          darkMode={darkMode}
+          title={paywallTitle}
+          message={paywallMessage}
+          onPurchase={handlePurchase}
+          onClose={closePaywall}
+        />
+      )}
+    </>
   );
 }

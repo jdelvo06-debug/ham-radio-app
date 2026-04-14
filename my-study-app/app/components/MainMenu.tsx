@@ -1,10 +1,12 @@
 'use client';
 
-import { Mode, Badge, StreakData, Lesson } from '../types';
+import { Mode, Badge, StreakData } from '../types';
 import OnboardingModal from './OnboardingModal';
 
 interface MainMenuProps {
   darkMode: boolean;
+  isPremium: boolean;
+  freeQuestionsRemaining: number;
   streakData: StreakData;
   earnedBadges: Badge[];
   badgesTotal: number;
@@ -19,6 +21,8 @@ interface MainMenuProps {
   masteredCount: number;
   startQuiz: (mode: Mode) => void;
   startReviewMode: (subelement?: string) => void;
+  openLearn: () => void;
+  openAnalytics: () => void;
   setAppState: (state: 'menu' | 'quiz' | 'results' | 'analytics' | 'learn' | 'lesson' | 'settings') => void;
   showOnboarding: boolean;
   onboardingSlide: number;
@@ -26,8 +30,18 @@ interface MainMenuProps {
   completeOnboarding: () => void;
 }
 
+function PremiumBadge({ darkMode }: { darkMode: boolean }) {
+  return (
+    <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${darkMode ? 'bg-amber-400/20 text-amber-300' : 'bg-amber-100 text-amber-700'}`}>
+      🔒 Premium
+    </span>
+  );
+}
+
 export default function MainMenu({
   darkMode,
+  isPremium,
+  freeQuestionsRemaining,
   streakData,
   earnedBadges,
   badgesTotal,
@@ -42,17 +56,36 @@ export default function MainMenu({
   masteredCount,
   startQuiz,
   startReviewMode,
+  openLearn,
+  openAnalytics,
   setAppState,
   showOnboarding,
   onboardingSlide,
   setOnboardingSlide,
   completeOnboarding,
 }: MainMenuProps) {
+  const bookmarksDisabled = isPremium && bookmarksCount === 0;
+  const reviewDisabled = isPremium && dueReviewCount === 0;
+
   return (
     <main className={`min-h-screen flex flex-col items-center justify-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
       <div className={`max-w-md w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-10 rounded-2xl shadow-xl text-center`}>
         <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Ham Radio Study Buddy</h1>
         <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-4`}>Technician Class Prep</p>
+
+        {!isPremium && (
+          <div className={`mb-6 rounded-2xl border px-4 py-3 text-left ${darkMode ? 'border-blue-800 bg-blue-950/40' : 'border-blue-100 bg-blue-50'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wide ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
+              Free Plan
+            </p>
+            <p className={`mt-1 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+              {freeQuestionsRemaining} of 25 random practice questions left today
+            </p>
+            <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              Basic Study Mode is free. Everything else is Premium.
+            </p>
+          </div>
+        )}
 
         {streakData.totalStudyDays > 0 && (
           <div className={`mb-6 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200'}`}>
@@ -123,13 +156,14 @@ export default function MainMenu({
             Questions loaded: {questionsCount} total
           </p>
         </div>
-        
+
         <div className="space-y-3 mb-4">
           <button
-            onClick={() => setAppState('learn')}
+            onClick={openLearn}
             className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95"
           >
             📚 Learn
+            {!isPremium && <PremiumBadge darkMode={darkMode} />}
             <span className="block text-xs font-normal opacity-90 mt-1">
               Study topics before testing • {completedLessonsCount}/{lessonsTotal} completed
             </span>
@@ -141,7 +175,7 @@ export default function MainMenu({
           >
             📖 Study Mode
             <span className="block text-xs font-normal opacity-90 mt-1">
-              Immediate answers & explanations
+              {isPremium ? 'Immediate answers & explanations' : `${freeQuestionsRemaining}/25 free questions remaining today`}
             </span>
           </button>
 
@@ -150,6 +184,7 @@ export default function MainMenu({
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95"
           >
             📝 Practice Exam
+            {!isPremium && <PremiumBadge darkMode={darkMode} />}
             <span className="block text-xs font-normal opacity-90 mt-1">
               35 Questions • No hints • Pass/Fail
             </span>
@@ -157,14 +192,15 @@ export default function MainMenu({
 
           <button
             onClick={() => startQuiz('bookmarks')}
-            disabled={bookmarksCount === 0}
+            disabled={bookmarksDisabled}
             className={`w-full py-4 rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95 ${
-              bookmarksCount === 0
+              bookmarksDisabled
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 : 'bg-amber-500 hover:bg-amber-600 text-white'
             }`}
           >
             ⭐ Bookmarks
+            {!isPremium && <PremiumBadge darkMode={darkMode} />}
             <span className="block text-xs font-normal opacity-90 mt-1">
               Practice only bookmarked questions
             </span>
@@ -172,14 +208,15 @@ export default function MainMenu({
 
           <button
             onClick={() => startReviewMode()}
-            disabled={dueReviewCount === 0}
+            disabled={reviewDisabled}
             className={`w-full py-4 rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95 ${
-              dueReviewCount === 0
+              reviewDisabled
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 : 'bg-rose-500 hover:bg-rose-600 text-white'
             }`}
           >
             🔄 Review Due
+            {!isPremium && <PremiumBadge darkMode={darkMode} />}
             <span className="block text-xs font-normal opacity-90 mt-1">
               {dueReviewCount > 0
                 ? `${dueReviewCount} questions need review • ${masteredCount} mastered`
@@ -190,10 +227,11 @@ export default function MainMenu({
 
         <div className="flex gap-2 mt-2">
           <button
-            onClick={() => setAppState('analytics')}
+            onClick={openAnalytics}
             className={`flex-1 py-3 border rounded-lg text-sm font-semibold ${darkMode ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
           >
             📊 Analytics
+            {!isPremium && <PremiumBadge darkMode={darkMode} />}
           </button>
           <button
             onClick={() => setAppState('settings')}
