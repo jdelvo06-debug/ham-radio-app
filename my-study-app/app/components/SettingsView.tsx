@@ -177,7 +177,7 @@ export default function SettingsView({
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-3`}>Version {APP_VERSION}</p>
             <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} space-y-2`}>
               <p>
-                Questions sourced from the official FCC Technician Class question pool (2022-2026).
+                Questions sourced from the official FCC Technician Class question pool (2026-2030).
               </p>
               <p>
                 This app is not affiliated with the FCC or ARRL. Use for educational purposes only.

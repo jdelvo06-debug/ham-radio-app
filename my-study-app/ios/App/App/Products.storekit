@@ -1,0 +1,39 @@
+{
+  "identifier" : "B7F37C36-0D70-4B21-A7D6-35B494280BF2",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : true,
+      "internalID" : "D2BB7A77-8B6E-4FEC-A50E-6260EC415AE1",
+      "localizations" : [
+        {
+          "description" : "Unlock unlimited questions, all quiz modes, lessons, analytics, and bookmarks.",
+          "displayName" : "Ham Radio Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.studybuddy.hamradio.premium",
+      "referenceName" : "Premium Unlock",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "9E54A67C-7BFC-433A-9D7B-FD9E49A0F24E",
+    "_developerTeamID" : "R298F58QYJ",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_renewalRate" : 0,
+    "_storefront" : "USA"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ham Radio Study Buddy
 
-## Getting Started
+Next.js + Capacitor app for studying the FCC Amateur Radio Technician exam on web and iOS.
 
-First, run the development server:
+## Current release status
+
+As of 2026-04-20:
+- freemium/premium gating is wired into the app
+- StoreKit 2 purchase flow is integrated through `@capgo/native-purchases`
+- local StoreKit simulator purchase testing succeeded and premium unlocked correctly
+- restore purchase was flaky in the simulator and still needs a better validation pass
+- an iOS archive was created and uploaded to App Store Connect
+
+## Key app details
+
+- Bundle ID: `com.studybuddy.hamradio`
+- App Store name: **Ham Radio Study Buddy**
+- Premium product ID: `com.studybuddy.hamradio.premium`
+- Free tier: 25 questions/day
+- Premium unlock: non-consumable one-time purchase
+
+## Getting started
+
+Run the local dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:4000](http://localhost:4000) with your browser to see the result.
+Open [http://localhost:4000](http://localhost:4000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Mobile / iOS workflow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build web assets and sync to Capacitor:
 
-## Learn More
+```bash
+npm run build:mobile
+npx cap sync ios
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open the iOS project:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+open ios/App/App.xcodeproj
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+StoreKit test config lives at:
 
-## Deploy on Vercel
+```text
+ios/App/App/Products.storekit
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Important current files
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/hooks/usePremium.ts`
+- `app/components/PaywallModal.tsx`
+- `app/components/SettingsView.tsx`
+- `app/page.tsx`
+- `ios/App/App/Products.storekit`
+
+## Next steps
+
+1. Wait for the uploaded App Store Connect build to finish processing
+2. Complete TestFlight / App Review setup
+3. Attach `com.studybuddy.hamradio.premium` to the app submission if Apple requires it on the version record
+4. Re-test restore purchases in a less flaky environment than local simulator StoreKit

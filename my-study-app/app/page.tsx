@@ -82,7 +82,16 @@ export default function Home() {
   const [paywallMessage, setPaywallMessage] = useState('Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.');
   const [freeQuestionsRemaining, setFreeQuestionsRemaining] = useState(25);
 
-  const { isPremium, setPremium } = usePremium();
+  const {
+    isPremium,
+    isPurchasing,
+    isRestoring,
+    productDetails,
+    purchaseError,
+    purchase,
+    restore,
+    clearPurchaseError,
+  } = usePremium();
 
   const syncFreeQuestionCount = () => {
     resetIfNewDay();
@@ -93,12 +102,16 @@ export default function Home() {
     title = 'Unlock Ham Radio Premium',
     message = 'Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.'
   ) => {
+    clearPurchaseError();
     setPaywallTitle(title);
     setPaywallMessage(message);
     setShowPaywall(true);
   };
 
-  const closePaywall = () => setShowPaywall(false);
+  const closePaywall = () => {
+    clearPurchaseError();
+    setShowPaywall(false);
+  };
 
   // ---------- LOCALSTORAGE LOAD ----------
   useEffect(() => {
@@ -760,10 +773,18 @@ export default function Home() {
     setAppState('menu');
   };
 
-  const handlePurchase = () => {
-    console.log('IAP purchase triggered — StoreKit integration pending');
-    setPremium(true);
-    closePaywall();
+  const handlePurchase = async () => {
+    const success = await purchase();
+    if (success) {
+      closePaywall();
+    }
+  };
+
+  const handleRestore = async () => {
+    const success = await restore();
+    if (success) {
+      closePaywall();
+    }
   };
 
   // Pre-compute derived data for components
@@ -915,8 +936,14 @@ export default function Home() {
           darkMode={darkMode}
           title={paywallTitle}
           message={paywallMessage}
+          productTitle={productDetails?.title}
+          productPrice={productDetails?.priceString}
           onPurchase={handlePurchase}
+          onRestore={handleRestore}
           onClose={closePaywall}
+          isPurchasing={isPurchasing}
+          isRestoring={isRestoring}
+          error={purchaseError}
         />
       )}
     </>

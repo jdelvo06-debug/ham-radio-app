@@ -1,8 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import type { PluginListenerHandle } from '@capacitor/core';
+import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
 
 const PREMIUM_STORAGE_KEY = 'hamradio_premium';
+const PRODUCT_ID = 'com.studybuddy.hamradio.premium';
+
+export interface PremiumProductDetails {
+  description: string;
+  price: number;
+  priceString: string;
+  title: string;
+}
 
 const readPremiumStatus = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -14,32 +24,188 @@ const readPremiumStatus = (): boolean => {
   }
 };
 
+const persistPremiumStatus = (value: boolean) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    if (value) {
+      window.localStorage.setItem(PREMIUM_STORAGE_KEY, 'true');
+    } else {
+      window.localStorage.removeItem(PREMIUM_STORAGE_KEY);
+    }
+  } catch {}
+};
+
+const checkNativePremiumStatus = async (): Promise<boolean | null> => {
+  try {
+    const { isBillingSupported } = await NativePurchases.isBillingSupported();
+    if (!isBillingSupported) return null;
+
+    const { purchases } = await NativePurchases.getPurchases({
+      productType: PURCHASE_TYPE.INAPP,
+      onlyCurrentEntitlements: true,
+    });
+
+    return purchases.some(
+      (purchase) =>
+        purchase.productIdentifier === PRODUCT_ID && !purchase.revocationDate
+    );
+  } catch {
+    return null;
+  }
+};
+
 export function usePremium() {
   const [isPremium, setIsPremium] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [productDetails, setProductDetails] =
+    useState<PremiumProductDetails | null>(null);
 
   useEffect(() => {
-    setIsPremium(readPremiumStatus());
+    const cached = readPremiumStatus();
+    setIsPremium(cached);
+
+    const hydrateStoreState = async () => {
+      try {
+        const { isBillingSupported } = await NativePurchases.isBillingSupported();
+        if (!isBillingSupported) return;
+
+        const [{ product }, hasPremium] = await Promise.all([
+          NativePurchases.getProduct({
+            productIdentifier: PRODUCT_ID,
+            productType: PURCHASE_TYPE.INAPP,
+          }),
+          checkNativePremiumStatus(),
+        ]);
+
+        setProductDetails({
+          description: product.description,
+          price: product.price,
+          priceString: product.priceString,
+          title: product.title,
+        });
+
+        if (hasPremium === null) return;
+
+        setIsPremium(hasPremium);
+        persistPremiumStatus(hasPremium);
+      } catch {
+        // Web and unsupported environments are fine.
+      }
+    };
+
+    void hydrateStoreState();
+  }, []);
+
+  useEffect(() => {
+    let listenerHandle: PluginListenerHandle | null = null;
+
+    const setupListener = async () => {
+      try {
+        listenerHandle = await NativePurchases.addListener(
+          'transactionUpdated',
+          (transaction) => {
+            if (
+              transaction.productIdentifier === PRODUCT_ID &&
+              !transaction.revocationDate
+            ) {
+              setPurchaseError(null);
+              setIsPremium(true);
+              persistPremiumStatus(true);
+            }
+          }
+        );
+      } catch {
+        // Web and unsupported environments are fine.
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      void listenerHandle?.remove();
+    };
+  }, []);
+
+  const purchase = useCallback(async (): Promise<boolean> => {
+    setPurchaseError(null);
+    setIsPurchasing(true);
+
+    try {
+      await NativePurchases.purchaseProduct({
+        productIdentifier: PRODUCT_ID,
+        productType: PURCHASE_TYPE.INAPP,
+      });
+
+      setIsPremium(true);
+      persistPremiumStatus(true);
+      return true;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Purchase failed';
+
+      if (!message.toLowerCase().includes('cancel')) {
+        setPurchaseError(message);
+      }
+
+      return false;
+    } finally {
+      setIsPurchasing(false);
+    }
+  }, []);
+
+  const restore = useCallback(async (): Promise<boolean> => {
+    setPurchaseError(null);
+    setIsRestoring(true);
+
+    try {
+      await NativePurchases.restorePurchases();
+
+      const hasPremium = await checkNativePremiumStatus();
+      if (hasPremium) {
+        setIsPremium(true);
+        persistPremiumStatus(true);
+        return true;
+      }
+
+      setPurchaseError('No previous purchase found to restore.');
+      return false;
+    } catch (error: unknown) {
+      setPurchaseError(
+        error instanceof Error ? error.message : 'Restore failed'
+      );
+      return false;
+    } finally {
+      setIsRestoring(false);
+    }
   }, []);
 
   const setPremium = useCallback((value: boolean) => {
     setIsPremium(value);
-
-    if (typeof window === 'undefined') return;
-
-    try {
-      window.localStorage.setItem(PREMIUM_STORAGE_KEY, String(value));
-    } catch {}
+    persistPremiumStatus(value);
   }, []);
 
   const clearPremium = useCallback(() => {
     setIsPremium(false);
-
-    if (typeof window === 'undefined') return;
-
-    try {
-      window.localStorage.removeItem(PREMIUM_STORAGE_KEY);
-    } catch {}
+    persistPremiumStatus(false);
   }, []);
 
-  return { isPremium, setPremium, clearPremium };
+  const clearPurchaseError = useCallback(() => {
+    setPurchaseError(null);
+  }, []);
+
+  return {
+    isPremium,
+    isPurchasing,
+    isRestoring,
+    productDetails,
+    purchaseError,
+    purchase,
+    restore,
+    setPremium,
+    clearPremium,
+    clearPurchaseError,
+  };
 }
