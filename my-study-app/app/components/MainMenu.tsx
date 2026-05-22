@@ -30,9 +30,9 @@ interface MainMenuProps {
   completeOnboarding: () => void;
 }
 
-function PremiumBadge({ darkMode }: { darkMode: boolean }) {
+function PremiumTag() {
   return (
-    <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${darkMode ? 'bg-amber-400/20 text-amber-300' : 'bg-amber-100 text-amber-700'}`}>
+    <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-amber-400/20 text-amber-300">
       🔒 Premium
     </span>
   );
@@ -68,58 +68,63 @@ export default function MainMenu({
   const reviewDisabled = isPremium && dueReviewCount === 0;
 
   return (
-    <main className={`min-h-screen flex flex-col items-center justify-center p-6 ${darkMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
-      <div className={`max-w-md w-full ${darkMode ? 'bg-slate-800' : 'bg-white'} p-10 rounded-2xl shadow-xl text-center`}>
-        <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Ham Radio Study Buddy</h1>
-        <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-4`}>Technician Class Prep</p>
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-950">
+      <div className="w-full max-w-lg bg-slate-900 rounded-2xl shadow-2xl shadow-black/50 border border-slate-800 p-6 sm:p-10 text-center">
 
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-sky-400 mb-2 tracking-tight">
+            Ham Radio Study Buddy
+          </h1>
+          <p className="text-slate-400 text-sm font-medium">Technician Class Prep</p>
+        </div>
+
+        {/* Free Plan Banner */}
         {!isPremium && (
-          <div className={`mb-6 rounded-2xl border px-4 py-3 text-left ${darkMode ? 'border-blue-800 bg-blue-950/40' : 'border-blue-100 bg-blue-50'}`}>
-            <p className={`text-xs font-bold uppercase tracking-wide ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
+          <div className="mb-6 rounded-xl border border-sky-900/60 bg-sky-950/40 px-4 py-3 text-left">
+            <p className="text-xs font-bold uppercase tracking-wide text-sky-400">
               Free Plan
             </p>
-            <p className={`mt-1 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+            <p className="mt-1 text-sm font-semibold text-white">
               {freeQuestionsRemaining} of 25 random practice questions left today
             </p>
-            <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className="mt-1 text-xs text-slate-400">
               Basic Study Mode is free. Everything else is Premium.
             </p>
           </div>
         )}
 
+        {/* Streak Bar */}
         {streakData.totalStudyDays > 0 && (
-          <div className={`mb-6 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200'}`}>
-            <div className="flex items-center justify-center gap-4">
+          <div className="mb-6 rounded-xl bg-slate-800/80 border border-slate-700/50 p-4">
+            <div className="flex items-center justify-center gap-5">
               <div className="text-center">
-                <span className="text-2xl">🔥</span>
-                <p className={`text-lg font-bold ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>{streakData.currentStreak}</p>
-                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Day Streak</p>
+                <span className="text-xl">🔥</span>
+                <p className="text-lg font-bold text-orange-400 mt-0.5">{streakData.currentStreak}</p>
+                <p className="text-[11px] text-slate-500">Day Streak</p>
               </div>
-              <div className={`w-px h-10 ${darkMode ? 'bg-slate-600' : 'bg-amber-200'}`}></div>
+              <div className="w-px h-10 bg-slate-700" />
               <div className="text-center">
-                <span className="text-2xl">⭐</span>
-                <p className={`text-lg font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>{streakData.longestStreak}</p>
-                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Best Streak</p>
+                <span className="text-xl">⭐</span>
+                <p className="text-lg font-bold text-amber-400 mt-0.5">{streakData.longestStreak}</p>
+                <p className="text-[11px] text-slate-500">Best Streak</p>
               </div>
-              <div className={`w-px h-10 ${darkMode ? 'bg-slate-600' : 'bg-amber-200'}`}></div>
+              <div className="w-px h-10 bg-slate-700" />
               <div className="text-center">
-                <span className="text-2xl">📅</span>
-                <p className={`text-lg font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{streakData.totalStudyDays}</p>
-                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Total Days</p>
+                <span className="text-xl">📅</span>
+                <p className="text-lg font-bold text-sky-400 mt-0.5">{streakData.totalStudyDays}</p>
+                <p className="text-[11px] text-slate-500">Total Days</p>
               </div>
             </div>
           </div>
         )}
 
+        {/* Achievements */}
         {earnedBadges.length > 0 && (
-          <div className={`mb-6 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200'}`}>
+          <div className="mb-6 rounded-xl bg-slate-800/80 border border-slate-700/50 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className={`text-xs font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                🏆 Achievements
-              </span>
-              <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
-                {earnedBadges.length}/{badgesTotal}
-              </span>
+              <span className="text-xs font-semibold text-slate-400">🏆 Achievements</span>
+              <span className="text-xs text-slate-500">{earnedBadges.length}/{badgesTotal}</span>
             </div>
             <div className="flex justify-center gap-1 flex-wrap">
               {earnedBadges.slice(0, 8).map((badge) => (
@@ -128,7 +133,7 @@ export default function MainMenu({
                 </span>
               ))}
               {earnedBadges.length > 8 && (
-                <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'} self-center`}>
+                <span className="text-sm text-slate-500 self-center">
                   +{earnedBadges.length - 8}
                 </span>
               )}
@@ -136,14 +141,15 @@ export default function MainMenu({
           </div>
         )}
 
+        {/* Subelement Selector */}
         <div className="mb-6 text-left">
-          <label className={`block text-xs font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'} mb-1`}>
+          <label className="block text-xs font-semibold text-slate-400 mb-1.5">
             Focus Area (Subelement)
           </label>
           <select
             value={selectedSubelement}
             onChange={(e) => setSelectedSubelement(e.target.value as 'ALL' | string)}
-            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'border-slate-600 bg-slate-700 text-white' : 'border-slate-200 bg-slate-50 text-slate-800'}`}
+            className="w-full border border-slate-700 bg-slate-800 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50 appearance-none cursor-pointer"
           >
             <option value="ALL">All Subelements</option>
             {subelements.map((sub) => (
@@ -152,40 +158,41 @@ export default function MainMenu({
               </option>
             ))}
           </select>
-          <p className={`mt-1 text-[11px] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+          <p className="mt-1.5 text-[11px] text-slate-500">
             Questions loaded: {questionsCount} total
           </p>
         </div>
 
-        <div className="space-y-3 mb-4">
+        {/* Mode Buttons */}
+        <div className="space-y-2.5 mb-4">
           <button
             onClick={openLearn}
-            className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95"
+            className="w-full py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-base shadow-lg shadow-violet-900/30 transition-all active:scale-[0.98]"
           >
             📚 Learn
-            {!isPremium && <PremiumBadge darkMode={darkMode} />}
-            <span className="block text-xs font-normal opacity-90 mt-1">
+            {!isPremium && <PremiumTag />}
+            <span className="block text-xs font-normal opacity-80 mt-1">
               Study topics before testing • {completedLessonsCount}/{lessonsTotal} completed
             </span>
           </button>
 
           <button
             onClick={() => startQuiz('study')}
-            className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95"
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-base shadow-lg shadow-emerald-900/30 transition-all active:scale-[0.98]"
           >
             📖 Study Mode
-            <span className="block text-xs font-normal opacity-90 mt-1">
+            <span className="block text-xs font-normal opacity-80 mt-1">
               {isPremium ? 'Immediate answers & explanations' : `${freeQuestionsRemaining}/25 free questions remaining today`}
             </span>
           </button>
 
           <button
             onClick={() => startQuiz('exam')}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95"
+            className="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-base shadow-lg shadow-sky-900/30 transition-all active:scale-[0.98]"
           >
             📝 Practice Exam
-            {!isPremium && <PremiumBadge darkMode={darkMode} />}
-            <span className="block text-xs font-normal opacity-90 mt-1">
+            {!isPremium && <PremiumTag />}
+            <span className="block text-xs font-normal opacity-80 mt-1">
               35 Questions • No hints • Pass/Fail
             </span>
           </button>
@@ -193,15 +200,15 @@ export default function MainMenu({
           <button
             onClick={() => startQuiz('bookmarks')}
             disabled={bookmarksDisabled}
-            className={`w-full py-4 rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95 ${
+            className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition-all active:scale-[0.98] ${
               bookmarksDisabled
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                : 'bg-amber-500 hover:bg-amber-600 text-white'
+                ? 'bg-slate-800 text-slate-600 cursor-not-allowed shadow-none'
+                : 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-900/30'
             }`}
           >
             ⭐ Bookmarks
-            {!isPremium && <PremiumBadge darkMode={darkMode} />}
-            <span className="block text-xs font-normal opacity-90 mt-1">
+            {!isPremium && <PremiumTag />}
+            <span className="block text-xs font-normal opacity-80 mt-1">
               Practice only bookmarked questions
             </span>
           </button>
@@ -209,15 +216,15 @@ export default function MainMenu({
           <button
             onClick={() => startReviewMode()}
             disabled={reviewDisabled}
-            className={`w-full py-4 rounded-xl font-bold text-lg shadow-md transition-transform active:scale-95 ${
+            className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition-all active:scale-[0.98] ${
               reviewDisabled
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                : 'bg-rose-500 hover:bg-rose-600 text-white'
+                ? 'bg-slate-800 text-slate-600 cursor-not-allowed shadow-none'
+                : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/30'
             }`}
           >
             🔄 Review Due
-            {!isPremium && <PremiumBadge darkMode={darkMode} />}
-            <span className="block text-xs font-normal opacity-90 mt-1">
+            {!isPremium && <PremiumTag />}
+            <span className="block text-xs font-normal opacity-80 mt-1">
               {dueReviewCount > 0
                 ? `${dueReviewCount} questions need review • ${masteredCount} mastered`
                 : 'No reviews due • Study to add questions'}
@@ -225,24 +232,25 @@ export default function MainMenu({
           </button>
         </div>
 
-        <div className="flex gap-2 mt-2">
+        {/* Bottom Row */}
+        <div className="flex gap-2.5 mt-3">
           <button
             onClick={openAnalytics}
-            className={`flex-1 py-3 border rounded-lg text-sm font-semibold ${darkMode ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            className="flex-1 py-3 border border-slate-700 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 transition-colors"
           >
             📊 Analytics
-            {!isPremium && <PremiumBadge darkMode={darkMode} />}
+            {!isPremium && <PremiumTag />}
           </button>
           <button
             onClick={() => setAppState('settings')}
-            className={`flex-1 py-3 border rounded-lg text-sm font-semibold ${darkMode ? 'border-slate-600 text-slate-400 hover:bg-slate-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            className="flex-1 py-3 border border-slate-700 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 transition-colors"
           >
             ⚙️ Settings
           </button>
         </div>
 
         {bookmarksCount > 0 && (
-          <p className={`mt-2 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+          <p className="mt-3 text-xs text-slate-500">
             {bookmarksCount} question{bookmarksCount === 1 ? '' : 's'} bookmarked
           </p>
         )}

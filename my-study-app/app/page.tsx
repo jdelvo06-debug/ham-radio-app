@@ -61,7 +61,7 @@ export default function Home() {
 
   const [spacedRepData, setSpacedRepData] = useState<Record<string, SpacedRepData>>({});
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   const [streakData, setStreakData] = useState<StreakData>({
     currentStreak: 0,
@@ -332,6 +332,7 @@ export default function Home() {
       const next = !prev;
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(next));
+        document.documentElement.classList.toggle('dark', next);
       }
       return next;
     });

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#2196F3",
+  themeColor: "#0f172a",
 };
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Ham Radio Study",
   },
 };
@@ -33,8 +33,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                try {
+                  var d = JSON.parse(localStorage.getItem('ham_technician_dark_mode'));
+                  if (d === true) document.documentElement.classList.add('dark');
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         <link rel="icon" href="/icons/icon-48.webp" sizes="48x48" />
         <link rel="icon" href="/icons/icon-192.webp" sizes="192x192" />
         <link rel="apple-touch-icon" href="/icons/icon-192.webp" />
