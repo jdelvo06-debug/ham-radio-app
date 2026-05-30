@@ -115,7 +115,7 @@ export const ONBOARDING_SLIDES = [
   },
 ];
 
-export const APP_VERSION = '1.3.0';
+export const APP_VERSION = '1.1.1';
 
 export const BADGES: Badge[] = [
   { id: 'first_question', name: 'First Steps', icon: '🎯', description: 'Answer your first question', check: (p) => p.totalAnswered >= 1 },
