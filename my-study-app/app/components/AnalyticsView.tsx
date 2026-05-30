@@ -13,7 +13,6 @@ interface AnalyticsViewProps {
 }
 
 export default function AnalyticsView({
-  darkMode,
   subelements,
   lessons,
   globalStats,

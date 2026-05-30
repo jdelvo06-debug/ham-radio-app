@@ -24,6 +24,7 @@ import {
   LS_ONBOARDING_KEY,
   REVIEW_INTERVALS,
   BADGES,
+  APP_VERSION,
 } from './types';
 import MainMenu from './components/MainMenu';
 import LearnView from './components/LearnView';
@@ -81,6 +82,7 @@ export default function Home() {
   const [paywallTitle, setPaywallTitle] = useState('Unlock Ham Radio Premium');
   const [paywallMessage, setPaywallMessage] = useState('Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.');
   const [freeQuestionsRemaining, setFreeQuestionsRemaining] = useState(25);
+  const [reviewNow, setReviewNow] = useState(0);
 
   const {
     isPremium,
@@ -174,6 +176,10 @@ export default function Home() {
   useEffect(() => {
     syncFreeQuestionCount();
   }, [isPremium]);
+
+  useEffect(() => {
+    setReviewNow(Date.now());
+  }, [spacedRepData]);
 
   // ---------- HELPERS ----------
 
@@ -271,8 +277,7 @@ export default function Home() {
     });
   };
 
-  const getDueReviewQuestions = (subelement?: string): Question[] => {
-    const now = Date.now();
+  const getDueReviewQuestions = (subelement?: string, now = reviewNow): Question[] => {
     const allQuestions = questionsData as Question[];
 
     return allQuestions.filter((q) => {
@@ -305,7 +310,7 @@ export default function Home() {
       return;
     }
 
-    const dueQuestions = getDueReviewQuestions(subelement);
+    const dueQuestions = getDueReviewQuestions(subelement, Date.now());
 
     if (dueQuestions.length === 0) {
       alert('No questions due for review! Keep studying to add questions to review.');
@@ -437,7 +442,7 @@ export default function Home() {
 
   const exportProgress = () => {
     const exportData = {
-      version: '1.3.0',
+      version: APP_VERSION,
       exportedAt: new Date().toISOString(),
       data: {
         globalStats,

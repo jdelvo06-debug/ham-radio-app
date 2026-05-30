@@ -117,6 +117,23 @@ npm run build:mobile
 npx cap sync
 ```
 
+### App Store Release Prep
+
+The current iOS release-prep workflow includes App Store screenshot assets and validation scripts:
+
+```bash
+# From my-study-app/
+npm run screenshots:app-store
+npm run validate:app-store-screenshots
+npm run validate:ios-release
+```
+
+Assets live under `app-store-assets/ios/`:
+- `iphone-6.5/` — 5 screenshots at `1284x2778`
+- `ipad-13/` — 5 screenshots at `2048x2732`
+
+The iOS metadata validator currently expects version `1.1.1` build `5`.
+
 ### PWA Install
 
 The app is installable as a Progressive Web App. When running in production (PM2):

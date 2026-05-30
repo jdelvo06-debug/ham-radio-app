@@ -14,7 +14,6 @@ interface LessonViewProps {
 }
 
 export default function LessonView({
-  darkMode,
   currentLesson,
   completed,
   lessons,

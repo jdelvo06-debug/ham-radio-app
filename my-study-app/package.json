@@ -7,7 +7,10 @@
     "build": "next build --webpack",
     "build:mobile": "next build --webpack && npx next export",
     "start": "next start -p 4000",
-    "lint": "eslint"
+    "lint": "eslint",
+    "screenshots:app-store": "node ../ci_scripts/generate_app_store_screenshots.mjs",
+    "validate:app-store-screenshots": "node ../ci_scripts/validate_app_store_screenshots.mjs",
+    "validate:ios-release": "node ../ci_scripts/validate_ios_release_metadata.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.1",
