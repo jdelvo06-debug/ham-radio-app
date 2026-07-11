@@ -19,7 +19,6 @@ interface ResultsViewProps {
 }
 
 export default function ResultsView({
-  darkMode,
   mode,
   score,
   activeQuestions,

@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
+import { hasCurrentPremiumEntitlement, PREMIUM_PRODUCT_ID } from '../utils/entitlements';
 
 const PREMIUM_STORAGE_KEY = 'hamradio_premium';
-const PRODUCT_ID = 'com.studybuddy.hamradio.premium';
 
 export interface PremiumProductDetails {
   description: string;
@@ -46,10 +46,7 @@ const checkNativePremiumStatus = async (): Promise<boolean | null> => {
       onlyCurrentEntitlements: true,
     });
 
-    return purchases.some(
-      (purchase) =>
-        purchase.productIdentifier === PRODUCT_ID && !purchase.revocationDate
-    );
+    return hasCurrentPremiumEntitlement(purchases);
   } catch {
     return null;
   }
@@ -74,7 +71,7 @@ export function usePremium() {
 
         const [{ product }, hasPremium] = await Promise.all([
           NativePurchases.getProduct({
-            productIdentifier: PRODUCT_ID,
+            productIdentifier: PREMIUM_PRODUCT_ID,
             productType: PURCHASE_TYPE.INAPP,
           }),
           checkNativePremiumStatus(),
@@ -108,7 +105,7 @@ export function usePremium() {
           'transactionUpdated',
           (transaction) => {
             if (
-              transaction.productIdentifier === PRODUCT_ID &&
+              transaction.productIdentifier === PREMIUM_PRODUCT_ID &&
               !transaction.revocationDate
             ) {
               setPurchaseError(null);
@@ -135,7 +132,7 @@ export function usePremium() {
 
     try {
       await NativePurchases.purchaseProduct({
-        productIdentifier: PRODUCT_ID,
+        productIdentifier: PREMIUM_PRODUCT_ID,
         productType: PURCHASE_TYPE.INAPP,
       });
 

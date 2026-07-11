@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Lesson, GlobalSubelementStats } from '../types';
+import { Badge, GlobalSubelementStats } from '../types';
 import { APP_VERSION } from '../types';
 
 interface SettingsViewProps {

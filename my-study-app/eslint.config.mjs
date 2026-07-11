@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "public/sw.js",
+    "public/workbox-*.js",
+    "android/app/src/main/assets/public/**",
+    "ios/App/App/public/**",
   ]),
 ]);
 

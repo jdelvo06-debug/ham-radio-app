@@ -21,7 +21,6 @@ interface QuizViewProps {
 }
 
 export default function QuizView({
-  darkMode,
   mode,
   selectedSubelement,
   activeQuestions,

@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
+import { describe, expect, it } from 'vitest';
 
 import type { Question } from '../types';
 import { selectOfficialExamQuestions } from './examBlueprint.ts';
@@ -14,7 +13,8 @@ function question(id: string): Question {
   };
 }
 
-test('selects exactly one question from every official group', () => {
+describe('official exam composition', () => {
+it('selects exactly one question from every official group', () => {
   const groups = [
     'T1A', 'T1B', 'T1C', 'T1D', 'T1E', 'T1F',
     'T2A', 'T2B', 'T2C',
@@ -31,13 +31,12 @@ test('selects exactly one question from every official group', () => {
 
   const exam = selectOfficialExamQuestions(pool, () => 0);
 
-  assert.equal(exam.length, 35);
-  assert.deepEqual(new Set(exam.map((item) => item.id.slice(0, 3))), new Set(groups));
+  expect(exam).toHaveLength(35);
+  expect(new Set(exam.map((item) => item.id.slice(0, 3)))).toEqual(new Set(groups));
 });
 
-test('rejects an incomplete official group set', () => {
-  assert.throws(
-    () => selectOfficialExamQuestions([question('T1A01')], () => 0),
-    /35 official groups/,
-  );
+it('rejects an incomplete official group set', () => {
+  expect(() => selectOfficialExamQuestions([question('T1A01')], () => 0))
+    .toThrow(/35 official groups/);
+});
 });
