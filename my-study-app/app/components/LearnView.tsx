@@ -3,7 +3,6 @@
 import { Lesson, GlobalSubelementStats } from '../types';
 
 interface LearnViewProps {
-  darkMode: boolean;
   lessons: Lesson[];
   completedLessons: string[];
   globalStats: Record<string, GlobalSubelementStats>;

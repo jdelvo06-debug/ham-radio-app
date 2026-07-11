@@ -4,8 +4,6 @@ import { Badge, GlobalSubelementStats } from '../types';
 import { APP_VERSION } from '../types';
 
 interface SettingsViewProps {
-  darkMode: boolean;
-  toggleDarkMode: () => void;
   globalStats: Record<string, GlobalSubelementStats>;
   completedLessonsCount: number;
   lessonsTotal: number;
@@ -23,8 +21,6 @@ interface SettingsViewProps {
 }
 
 export default function SettingsView({
-  darkMode,
-  toggleDarkMode,
   globalStats,
   completedLessonsCount,
   lessonsTotal,
@@ -50,25 +46,6 @@ export default function SettingsView({
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
           ⚙️ Settings
         </h2>
-
-        {/* Appearance */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
-            Appearance
-          </h3>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/80 border border-slate-700/50">
-            <div>
-              <p className="font-medium text-white">Dark Mode</p>
-              <p className="text-sm text-slate-400">Easier on the eyes at night</p>
-            </div>
-            <button
-              onClick={toggleDarkMode}
-              className={`relative w-14 h-8 rounded-full transition-colors ${darkMode ? 'bg-sky-600' : 'bg-slate-600'}`}
-            >
-              <span className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${darkMode ? 'translate-x-7' : 'translate-x-1'}`} />
-            </button>
-          </div>
-        </div>
 
         {/* Data & Progress */}
         <div className="mb-6">

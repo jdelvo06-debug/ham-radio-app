@@ -4,7 +4,6 @@ import { Question, Mode, SpacedRepData } from '../types';
 import QuestionFigure from './QuestionFigure';
 
 interface QuizViewProps {
-  darkMode: boolean;
   mode: Mode;
   selectedSubelement: 'ALL' | string;
   activeQuestions: Question[];
@@ -40,6 +39,15 @@ export default function QuizView({
     ? ((currentQuestionIndex + 1) / activeQuestions.length) * 100
     : 0;
   const currentBookmarked = isBookmarked(currentQuestion.id);
+  const givesImmediateFeedback = mode === 'study' || mode === 'bookmarks' || mode === 'review';
+  const selectedAnswerIndex = selectedAnswer === null
+    ? -1
+    : currentQuestion.options.indexOf(selectedAnswer);
+  const answerWasCorrect = selectedAnswerIndex >= 0
+    && isAnswerCorrect(selectedAnswerIndex, currentQuestion.correctAnswer);
+  const feedbackAnnouncement = givesImmediateFeedback && showExplanation
+    ? `${answerWasCorrect ? 'Correct.' : 'Incorrect.'} ${currentQuestion.explanation}`
+    : '';
 
   const modeLabel =
     mode === 'exam' ? 'Practice Exam' : mode === 'bookmarks' ? 'Bookmarks' : mode === 'review' ? 'Review Mode' : 'Study Mode';
@@ -79,7 +87,15 @@ export default function QuizView({
               </span>
             </div>
           </div>
-          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+          <div
+            role="progressbar"
+            aria-label="Quiz progress"
+            aria-valuemin={0}
+            aria-valuemax={activeQuestions.length}
+            aria-valuenow={currentQuestionIndex + 1}
+            aria-valuetext={`Question ${currentQuestionIndex + 1} of ${activeQuestions.length}`}
+            className="w-full bg-slate-800 h-2 rounded-full overflow-hidden"
+          >
             <div
               className="bg-sky-500 h-full rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -135,6 +151,10 @@ export default function QuizView({
               </button>
             );
           })}
+        </div>
+
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {feedbackAnnouncement}
         </div>
 
         {/* Footer: explanation + actions */}

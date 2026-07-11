@@ -15,7 +15,6 @@ function renderMenu() {
 
   render(
     <MainMenu
-      darkMode
       isPremium
       freeQuestionsRemaining={25}
       streakData={{ currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 }}

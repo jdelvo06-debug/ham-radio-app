@@ -19,7 +19,6 @@ import {
   LS_GLOBAL_STATS_KEY,
   LS_COMPLETED_LESSONS_KEY,
   LS_SPACED_REP_KEY,
-  LS_DARK_MODE_KEY,
   LS_STREAK_KEY,
   LS_ONBOARDING_KEY,
   REVIEW_INTERVALS,
@@ -64,8 +63,6 @@ export default function Home() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   const [spacedRepData, setSpacedRepData] = useState<Record<string, SpacedRepData>>({});
-
-  const [darkMode, setDarkMode] = useState(true);
 
   const [streakData, setStreakData] = useState<StreakData>({
     currentStreak: 0,
@@ -148,13 +145,6 @@ export default function Home() {
         const savedSpacedRep = window.localStorage.getItem(LS_SPACED_REP_KEY);
         if (savedSpacedRep) {
           setSpacedRepData(JSON.parse(savedSpacedRep));
-        }
-      } catch {}
-
-      try {
-        const savedDarkMode = window.localStorage.getItem(LS_DARK_MODE_KEY);
-        if (savedDarkMode) {
-          setDarkMode(JSON.parse(savedDarkMode));
         }
       } catch {}
 
@@ -356,17 +346,6 @@ export default function Home() {
     setActiveQuestions(limited);
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(next));
-        document.documentElement.classList.toggle('dark', next);
-      }
-      return next;
-    });
-  };
-
   const completeOnboarding = () => {
     setShowOnboarding(false);
     setOnboardingSlide(0);
@@ -473,7 +452,6 @@ export default function Home() {
         bookmarks,
         completedLessons,
         spacedRepData,
-        darkMode,
         streakData,
         passedExams,
       },
@@ -522,10 +500,6 @@ export default function Home() {
         if (data.spacedRepData !== undefined) {
           setSpacedRepData(data.spacedRepData);
           window.localStorage.setItem(LS_SPACED_REP_KEY, JSON.stringify(data.spacedRepData));
-        }
-        if (typeof data.darkMode === 'boolean') {
-          setDarkMode(data.darkMode);
-          window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(data.darkMode));
         }
         if (data.streakData !== undefined) {
           setStreakData(data.streakData);
@@ -837,7 +811,6 @@ export default function Home() {
   if (appState === 'menu') {
     content = (
       <MainMenu
-        darkMode={darkMode}
         isPremium={isPremium}
         freeQuestionsRemaining={freeQuestionsRemaining}
         streakData={streakData}
@@ -866,7 +839,6 @@ export default function Home() {
   } else if (appState === 'analytics') {
     content = (
       <AnalyticsView
-        darkMode={darkMode}
         subelements={subelements}
         lessons={lessons}
         globalStats={globalStats}
@@ -877,8 +849,6 @@ export default function Home() {
   } else if (appState === 'settings') {
     content = (
       <SettingsView
-        darkMode={darkMode}
-        toggleDarkMode={toggleDarkMode}
         globalStats={globalStats}
         completedLessonsCount={completedLessons.length}
         lessonsTotal={lessons.length}
@@ -898,7 +868,6 @@ export default function Home() {
   } else if (appState === 'learn') {
     content = (
       <LearnView
-        darkMode={darkMode}
         lessons={lessons}
         completedLessons={completedLessons}
         globalStats={globalStats}
@@ -912,7 +881,6 @@ export default function Home() {
   } else if (appState === 'lesson' && currentLesson) {
     content = (
       <LessonView
-        darkMode={darkMode}
         currentLesson={currentLesson}
         completed={isLessonCompleted(currentLesson.id)}
         lessons={lessons}
@@ -925,7 +893,6 @@ export default function Home() {
   } else if (appState === 'results') {
     content = (
       <ResultsView
-        darkMode={darkMode}
         mode={mode}
         score={score}
         activeQuestions={activeQuestions}
@@ -942,7 +909,6 @@ export default function Home() {
   } else {
     content = (
       <QuizView
-        darkMode={darkMode}
         mode={mode}
         selectedSubelement={selectedSubelement}
         activeQuestions={activeQuestions}
@@ -965,7 +931,6 @@ export default function Home() {
       {content}
       {showPaywall && (
         <PaywallModal
-          darkMode={darkMode}
           title={paywallTitle}
           message={paywallMessage}
           productTitle={productDetails?.title}

@@ -4,7 +4,6 @@ import { Mode, Badge, StreakData } from '../types';
 import OnboardingModal from './OnboardingModal';
 
 interface MainMenuProps {
-  darkMode: boolean;
   isPremium: boolean;
   freeQuestionsRemaining: number;
   streakData: StreakData;
@@ -39,7 +38,6 @@ function PremiumTag() {
 }
 
 export default function MainMenu({
-  darkMode,
   isPremium,
   freeQuestionsRemaining,
   streakData,
@@ -258,7 +256,6 @@ export default function MainMenu({
 
       {showOnboarding && (
         <OnboardingModal
-          darkMode={darkMode}
           onboardingSlide={onboardingSlide}
           setOnboardingSlide={setOnboardingSlide}
           completeOnboarding={completeOnboarding}

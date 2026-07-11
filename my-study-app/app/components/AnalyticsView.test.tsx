@@ -13,7 +13,6 @@ describe('AnalyticsView quiz launch', () => {
 
     render(
       <AnalyticsView
-        darkMode
         subelements={['T1']}
         lessons={[{
           id: 'T1',

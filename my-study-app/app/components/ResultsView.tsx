@@ -4,7 +4,6 @@ import { Question, Mode, SubelementStats, SpacedRepData } from '../types';
 import QuestionFigure from './QuestionFigure';
 
 interface ResultsViewProps {
-  darkMode: boolean;
   mode: Mode;
   score: number;
   activeQuestions: Question[];

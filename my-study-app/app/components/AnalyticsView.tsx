@@ -3,7 +3,6 @@
 import { Lesson, GlobalSubelementStats } from '../types';
 
 interface AnalyticsViewProps {
-  darkMode: boolean;
   subelements: string[];
   lessons: Lesson[];
   globalStats: Record<string, GlobalSubelementStats>;
