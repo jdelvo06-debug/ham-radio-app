@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { PluginListenerHandle } from '@capacitor/core';
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
 import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
 import { hasCurrentPremiumEntitlement, PREMIUM_PRODUCT_ID } from '../utils/entitlements';
 
@@ -37,6 +37,8 @@ const persistPremiumStatus = (value: boolean) => {
 };
 
 const checkNativePremiumStatus = async (): Promise<boolean | null> => {
+  if (!Capacitor.isNativePlatform()) return null;
+
   try {
     const { isBillingSupported } = await NativePurchases.isBillingSupported();
     if (!isBillingSupported) return null;
@@ -46,7 +48,7 @@ const checkNativePremiumStatus = async (): Promise<boolean | null> => {
       onlyCurrentEntitlements: true,
     });
 
-    return hasCurrentPremiumEntitlement(purchases);
+    return hasCurrentPremiumEntitlement(purchases, Capacitor.getPlatform());
   } catch {
     return null;
   }
@@ -65,6 +67,8 @@ export function usePremium() {
     setIsPremium(cached);
 
     const hydrateStoreState = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+
       try {
         const { isBillingSupported } = await NativePurchases.isBillingSupported();
         if (!isBillingSupported) return;
@@ -100,14 +104,16 @@ export function usePremium() {
     let listenerHandle: PluginListenerHandle | null = null;
 
     const setupListener = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+
       try {
         listenerHandle = await NativePurchases.addListener(
           'transactionUpdated',
           (transaction) => {
-            if (
-              transaction.productIdentifier === PREMIUM_PRODUCT_ID &&
-              !transaction.revocationDate
-            ) {
+            if (hasCurrentPremiumEntitlement(
+              [transaction],
+              Capacitor.getPlatform(),
+            )) {
               setPurchaseError(null);
               setIsPremium(true);
               persistPremiumStatus(true);
@@ -127,14 +133,24 @@ export function usePremium() {
   }, []);
 
   const purchase = useCallback(async (): Promise<boolean> => {
+    if (!Capacitor.isNativePlatform()) {
+      setPurchaseError('Purchases are only available in the mobile app.');
+      return false;
+    }
+
     setPurchaseError(null);
     setIsPurchasing(true);
 
     try {
-      await NativePurchases.purchaseProduct({
+      const transaction = await NativePurchases.purchaseProduct({
         productIdentifier: PREMIUM_PRODUCT_ID,
         productType: PURCHASE_TYPE.INAPP,
       });
+
+      if (!hasCurrentPremiumEntitlement([transaction], Capacitor.getPlatform())) {
+        setPurchaseError('Purchase is pending verification.');
+        return false;
+      }
 
       setIsPremium(true);
       persistPremiumStatus(true);
@@ -154,6 +170,11 @@ export function usePremium() {
   }, []);
 
   const restore = useCallback(async (): Promise<boolean> => {
+    if (!Capacitor.isNativePlatform()) {
+      setPurchaseError('Purchases are only available in the mobile app.');
+      return false;
+    }
+
     setPurchaseError(null);
     setIsRestoring(true);
 

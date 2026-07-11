@@ -870,8 +870,7 @@ export default function Home() {
         subelements={subelements}
         lessons={lessons}
         globalStats={globalStats}
-        setSelectedSubelement={setSelectedSubelement}
-        startQuiz={startQuiz}
+        startQuizForSubelement={startQuizForSubelement}
         setAppState={setAppState}
       />
     );

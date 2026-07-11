@@ -7,8 +7,7 @@ interface AnalyticsViewProps {
   subelements: string[];
   lessons: Lesson[];
   globalStats: Record<string, GlobalSubelementStats>;
-  setSelectedSubelement: (sub: 'ALL' | string) => void;
-  startQuiz: (mode: 'study' | 'exam' | 'bookmarks' | 'review') => void;
+  startQuizForSubelement: (subelement: string) => void;
   setAppState: (state: 'menu' | 'quiz' | 'results' | 'analytics' | 'learn' | 'lesson' | 'settings') => void;
 }
 
@@ -16,8 +15,7 @@ export default function AnalyticsView({
   subelements,
   lessons,
   globalStats,
-  setSelectedSubelement,
-  startQuiz,
+  startQuizForSubelement,
   setAppState,
 }: AnalyticsViewProps) {
   const getLessonTitle = (sub: string): string => {
@@ -67,7 +65,7 @@ export default function AnalyticsView({
                         <span className="ml-2 text-xs font-bold text-rose-400">({e.pct}%)</span>
                       </div>
                       <button
-                        onClick={() => { setSelectedSubelement(e.sub); startQuiz('study'); }}
+                        onClick={() => startQuizForSubelement(e.sub)}
                         className="text-xs px-3 py-1 rounded-full font-semibold bg-rose-900/60 text-rose-300 hover:bg-rose-800 transition-colors"
                       >
                         Study
@@ -102,7 +100,7 @@ export default function AnalyticsView({
                   {needsMoreData.map((e) => (
                     <button
                       key={e.sub}
-                      onClick={() => { setSelectedSubelement(e.sub); startQuiz('study'); }}
+                      onClick={() => startQuizForSubelement(e.sub)}
                       className="text-xs px-3 py-1 rounded-full font-semibold bg-amber-900/60 text-amber-300 hover:bg-amber-800 transition-colors"
                     >
                       {e.sub} - {e.title} ({e.total}/5)
