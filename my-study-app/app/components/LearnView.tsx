@@ -15,7 +15,6 @@ interface LearnViewProps {
 }
 
 export default function LearnView({
-  darkMode,
   lessons,
   completedLessons,
   globalStats,

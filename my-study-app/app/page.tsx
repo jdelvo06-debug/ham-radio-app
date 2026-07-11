@@ -24,6 +24,7 @@ import {
   LS_ONBOARDING_KEY,
   REVIEW_INTERVALS,
   BADGES,
+  APP_VERSION,
 } from './types';
 import MainMenu from './components/MainMenu';
 import LearnView from './components/LearnView';
@@ -36,6 +37,8 @@ import PaywallModal from './components/PaywallModal';
 import { usePremium } from './hooks/usePremium';
 import { getDailyQuestionsRemaining, incrementDailyCount, resetIfNewDay } from './utils/freeLimit';
 import { selectOfficialExamQuestions } from './utils/examBlueprint';
+import { migrateStreakState } from './utils/persistence';
+import { parseProgressBackup } from './utils/progressBackup';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('menu');
@@ -82,6 +85,7 @@ export default function Home() {
   const [paywallTitle, setPaywallTitle] = useState('Unlock Ham Radio Premium');
   const [paywallMessage, setPaywallMessage] = useState('Go beyond the free tier with unlimited questions, advanced quiz modes, lessons, analytics, and bookmarks.');
   const [freeQuestionsRemaining, setFreeQuestionsRemaining] = useState(25);
+  const [reviewTimestamp, setReviewTimestamp] = useState(() => Date.now());
 
   const {
     isPremium,
@@ -118,63 +122,77 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    syncFreeQuestionCount();
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const savedBookmarks = window.localStorage.getItem(LS_BOOKMARKS_KEY);
+        if (savedBookmarks) {
+          setBookmarks(JSON.parse(savedBookmarks));
+        }
+      } catch {}
 
-    try {
-      const savedBookmarks = window.localStorage.getItem(LS_BOOKMARKS_KEY);
-      if (savedBookmarks) {
-        setBookmarks(JSON.parse(savedBookmarks));
-      }
-    } catch {}
+      try {
+        const savedStats = window.localStorage.getItem(LS_GLOBAL_STATS_KEY);
+        if (savedStats) {
+          setGlobalStats(JSON.parse(savedStats));
+        }
+      } catch {}
 
-    try {
-      const savedStats = window.localStorage.getItem(LS_GLOBAL_STATS_KEY);
-      if (savedStats) {
-        setGlobalStats(JSON.parse(savedStats));
-      }
-    } catch {}
+      try {
+        const savedCompletedLessons = window.localStorage.getItem(LS_COMPLETED_LESSONS_KEY);
+        if (savedCompletedLessons) {
+          setCompletedLessons(JSON.parse(savedCompletedLessons));
+        }
+      } catch {}
 
-    try {
-      const savedCompletedLessons = window.localStorage.getItem(LS_COMPLETED_LESSONS_KEY);
-      if (savedCompletedLessons) {
-        setCompletedLessons(JSON.parse(savedCompletedLessons));
-      }
-    } catch {}
+      try {
+        const savedSpacedRep = window.localStorage.getItem(LS_SPACED_REP_KEY);
+        if (savedSpacedRep) {
+          setSpacedRepData(JSON.parse(savedSpacedRep));
+        }
+      } catch {}
 
-    try {
-      const savedSpacedRep = window.localStorage.getItem(LS_SPACED_REP_KEY);
-      if (savedSpacedRep) {
-        setSpacedRepData(JSON.parse(savedSpacedRep));
-      }
-    } catch {}
+      try {
+        const savedDarkMode = window.localStorage.getItem(LS_DARK_MODE_KEY);
+        if (savedDarkMode) {
+          setDarkMode(JSON.parse(savedDarkMode));
+        }
+      } catch {}
 
-    try {
-      const savedDarkMode = window.localStorage.getItem(LS_DARK_MODE_KEY);
-      if (savedDarkMode) {
-        setDarkMode(JSON.parse(savedDarkMode));
-      }
-    } catch {}
+      try {
+        const savedStreak = window.localStorage.getItem(LS_STREAK_KEY);
+        if (savedStreak) {
+          const migrated = migrateStreakState(savedStreak);
+          setStreakData(migrated.streakData);
+          setPassedExams(migrated.passedExams);
+        }
+      } catch {}
 
-    try {
-      const savedStreak = window.localStorage.getItem(LS_STREAK_KEY);
-      if (savedStreak) {
-        const parsed = JSON.parse(savedStreak);
-        setStreakData(parsed.streakData || { currentStreak: 0, longestStreak: 0, lastStudyDate: '', totalStudyDays: 0 });
-        setPassedExams(parsed.passedExams || 0);
-      }
-    } catch {}
+      try {
+        const onboardingComplete = window.localStorage.getItem(LS_ONBOARDING_KEY);
+        if (!onboardingComplete) {
+          setShowOnboarding(true);
+        }
+      } catch {}
+    }, 0);
 
-    try {
-      const onboardingComplete = window.localStorage.getItem(LS_ONBOARDING_KEY);
-      if (!onboardingComplete) {
-        setShowOnboarding(true);
-      }
-    } catch {}
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
-    syncFreeQuestionCount();
+    const timeoutId = window.setTimeout(syncFreeQuestionCount, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [isPremium]);
+
+  useEffect(() => {
+    const refreshReviewTimestamp = () => setReviewTimestamp(Date.now());
+    const intervalId = window.setInterval(refreshReviewTimestamp, 60_000);
+    window.addEventListener('focus', refreshReviewTimestamp);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshReviewTimestamp);
+    };
+  }, []);
 
   // ---------- HELPERS ----------
 
@@ -284,14 +302,13 @@ export default function Home() {
   };
 
   const getDueReviewQuestions = (subelement?: string): Question[] => {
-    const now = Date.now();
     const allQuestions = questionsData as Question[];
 
     return allQuestions.filter((q) => {
       if (subelement && !q.id.startsWith(subelement)) return false;
       const data = spacedRepData[q.id];
       if (!data) return false;
-      return data.nextReviewDate <= now && data.correctStreak < 3;
+      return data.nextReviewDate <= reviewTimestamp && data.correctStreak < 3;
     });
   };
 
@@ -449,7 +466,7 @@ export default function Home() {
 
   const exportProgress = () => {
     const exportData = {
-      version: '1.3.0',
+      version: APP_VERSION,
       exportedAt: new Date().toISOString(),
       data: {
         globalStats,
@@ -481,28 +498,28 @@ export default function Home() {
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        const importData = JSON.parse(content);
+        const importData = parseProgressBackup(JSON.parse(content));
 
-        if (!importData.data) {
+        if (!importData) {
           alert('Invalid backup file format.');
           return;
         }
 
         const { data } = importData;
 
-        if (data.globalStats) {
+        if (data.globalStats !== undefined) {
           setGlobalStats(data.globalStats);
           window.localStorage.setItem(LS_GLOBAL_STATS_KEY, JSON.stringify(data.globalStats));
         }
-        if (data.bookmarks) {
+        if (data.bookmarks !== undefined) {
           setBookmarks(data.bookmarks);
           window.localStorage.setItem(LS_BOOKMARKS_KEY, JSON.stringify(data.bookmarks));
         }
-        if (data.completedLessons) {
+        if (data.completedLessons !== undefined) {
           setCompletedLessons(data.completedLessons);
           window.localStorage.setItem(LS_COMPLETED_LESSONS_KEY, JSON.stringify(data.completedLessons));
         }
-        if (data.spacedRepData) {
+        if (data.spacedRepData !== undefined) {
           setSpacedRepData(data.spacedRepData);
           window.localStorage.setItem(LS_SPACED_REP_KEY, JSON.stringify(data.spacedRepData));
         }
@@ -510,9 +527,9 @@ export default function Home() {
           setDarkMode(data.darkMode);
           window.localStorage.setItem(LS_DARK_MODE_KEY, JSON.stringify(data.darkMode));
         }
-        if (data.streakData) {
+        if (data.streakData !== undefined) {
           setStreakData(data.streakData);
-          const importedPassedExams = data.passedExams || 0;
+          const importedPassedExams = data.passedExams ?? 0;
           setPassedExams(importedPassedExams);
           window.localStorage.setItem(LS_STREAK_KEY, JSON.stringify({ streakData: data.streakData, passedExams: importedPassedExams }));
         }
