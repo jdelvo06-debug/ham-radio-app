@@ -1,152 +1,217 @@
 #!/usr/bin/env python3
-"""
-Complete parser for Ham Radio Technician exam questions
-Processes the full text and generates complete JSON output
-"""
+"""Generate the bundled Technician pool from the corrected official NCVEC DOCX."""
 
-import re
+from __future__ import annotations
+
+import argparse
 import json
+import re
+import zipfile
+from collections import Counter
+from pathlib import Path
+from typing import Iterable
+from xml.etree import ElementTree
 
-def generate_explanation(question, options, correct_answer_letter, correct_answer_text):
-    """Generate contextual explanations based on question content"""
-    q_lower = question.lower()
-    opt_lower = correct_answer_text.lower()
-    answer_opt = options[ord(correct_answer_letter) - ord('A')].lower()
-    
-    # Comprehensive explanation generation based on question topics
-    explanations = {
-        'battery': {
-            'short': "Shorting a battery's terminals creates an extremely low-resistance path, allowing dangerously high current flow. This generates intense heat that can cause severe burns, ignite fires, or cause the battery to explode as rapid electrolysis releases flammable hydrogen gas.",
-            'overheat': "Rapid charging or discharging causes excessive current flow, generating heat and accelerating chemical reactions that produce potentially explosive hydrogen and oxygen gases.",
-        },
-        'current body': "Electrical current through the body causes multiple types of injury: resistive heating of tissue, disruption of the nervous system's electrical signals (especially dangerous for the heart), and involuntary muscle contractions that can cause falls or prevent releasing a live conductor.",
-        'wire black': "In standard US electrical wiring, color coding identifies conductors: black indicates the hot (ungrounded) conductor carrying current, white indicates the neutral (grounded) conductor, and green or bare copper indicates the safety ground.",
-        'fuse overload': "Fuses and circuit breakers are overcurrent protection devices designed to interrupt excessive current flow, preventing overheating, fires, and equipment damage. They must be properly sized and installed to function correctly.",
-        'fuse hot': "Protective devices should be installed only in the ungrounded (hot) conductor. This ensures proper circuit interruption while maintaining the safety function of the grounded neutral and preventing shock hazards.",
-        'fuse fire': "Using an oversized fuse defeats overcurrent protection. A fault that should trip a 5A fuse could allow up to 20A to flow, potentially overheating conductors and causing fires before the larger fuse opens.",
-        'ground bond': "Bonding all ground rods together ensures they're at the same electrical potential, preventing dangerous voltage differences. This provides a reliable, low-resistance path for fault currents and lightning to safely reach earth.",
-        'lightning': "Lightning arresters protect equipment by diverting electrical surges to ground before they can enter the building. They must be installed at the entry point of feed lines on a properly grounded panel to be effective.",
-        'voltage measure': "Using test equipment not rated for the voltage being measured can cause insulation breakdown, arcing, equipment failure, and severe electrical shock. Equipment voltage ratings must equal or exceed the maximum voltage encountered.",
-        'RF exposure': "RF exposure limits protect against potential health effects of radio frequency energy. Limits vary with frequency because the body absorbs RF energy differently at different frequencies. Exposure depends on power level, distance, antenna pattern, and duty cycle.",
-        'radiation non-ionizing': "Radio signals are non-ionizing radiation, meaning they don't have enough energy to remove electrons from atoms or break chemical bonds. Unlike ionizing radiation (X-rays, gamma rays), RF energy primarily affects tissue through heating.",
-        'RF burn': "Touching an active antenna during transmission can cause RF burns because the antenna radiates RF energy that can be absorbed by nearby conductors (including the human body), causing localized heating.",
-        'repeater offset': "Repeater offset is the frequency difference between the repeater's input (where you transmit) and output (where you receive) frequencies. This separation prevents interference and allows simultaneous transmit and receive operation.",
-        'CTCSS': "CTCSS (Continuous Tone-Coded Squelch System) uses a sub-audible tone transmitted with voice to open the repeater's squelch. This prevents interference from other signals and access to private repeater systems.",
-        'antenna polarization': "Matching polarization between transmitting and receiving antennas maximizes signal transfer. Mismatched polarization (vertical vs horizontal) significantly reduces received signal strength because antennas are most sensitive to signals with matching polarization.",
-        'antenna gain': "Antenna gain is the increase in signal strength in a specific direction compared to a reference antenna (usually isotropic or dipole). Directional antennas like Yagis achieve gain by focusing radiated energy in desired directions rather than radiating equally in all directions.",
-        'dipole pattern': "A half-wave dipole radiates most effectively broadside (perpendicular) to the antenna's length. The radiation pattern is roughly donut-shaped with minimum radiation off the ends of the antenna.",
-        'propagation': "Radio wave propagation involves multiple mechanisms: line-of-sight for direct paths, ionospheric reflection for long-distance HF communications, tropospheric ducting for extended VHF/UHF range, and diffraction that allows signals to bend around obstacles.",
-        'SSB': "Single Sideband (SSB) is an efficient form of amplitude modulation that transmits only one sideband, using less bandwidth and power than AM. It's preferred for voice communications, especially for weak-signal long-distance work.",
-        'FM': "Frequency Modulation varies the carrier frequency based on the audio signal amplitude. FM provides good audio quality and noise rejection but uses more bandwidth than SSB. It's commonly used for VHF/UHF voice repeaters.",
-        'Ohm law': "Ohm's Law (E = I × R) describes the relationship between voltage (E), current (I), and resistance (R) in an electrical circuit. This fundamental relationship allows calculation of any one parameter when the other two are known.",
-    }
-    
-    # Try to match specific patterns
-    if 'battery' in q_lower:
-        if 'short' in answer_opt:
-            return explanations['battery']['short']
-        if 'overheat' in answer_opt or 'gas' in answer_opt:
-            return explanations['battery']['overheat']
-    if 'current' in q_lower and 'body' in q_lower:
-        return explanations['current body']
-    if 'wire' in q_lower and 'black' in q_lower:
-        return explanations['wire black']
-    if 'fuse' in q_lower or 'circuit breaker' in q_lower:
-        if 'overload' in answer_opt:
-            return explanations['fuse overload']
-        if 'hot' in answer_opt:
-            return explanations['fuse hot']
-        if 'fire' in answer_opt:
-            return explanations['fuse fire']
-    if 'ground' in q_lower and 'bond' in answer_opt:
-        return explanations['ground bond']
-    if 'lightning' in q_lower:
-        return explanations['lightning']
-    if 'voltage' in q_lower and 'measure' in q_lower:
-        return explanations['voltage measure']
-    if 'RF' in q_lower and 'exposure' in q_lower:
-        return explanations['RF exposure']
-    if 'radiation' in q_lower and 'non-ionizing' in answer_opt:
-        return explanations['radiation non-ionizing']
-    if 'RF burn' in q_lower or ('touch' in q_lower and 'antenna' in q_lower):
-        return explanations['RF burn']
-    if 'repeater' in q_lower and 'offset' in q_lower:
-        return explanations['repeater offset']
-    if 'CTCSS' in q_lower or ('tone' in q_lower and 'sub' in answer_opt):
-        return explanations['CTCSS']
-    if 'antenna' in q_lower:
-        if 'polarization' in q_lower:
-            return explanations['antenna polarization']
-        if 'gain' in q_lower:
-            return explanations['antenna gain']
-        if 'dipole' in q_lower and 'pattern' in q_lower:
-            return explanations['dipole pattern']
-    if 'propagation' in q_lower or 'ionosphere' in q_lower:
-        return explanations['propagation']
-    if 'SSB' in q_lower or ('single sideband' in q_lower):
-        return explanations['SSB']
-    if 'FM' in q_lower and 'frequency modulation' in answer_opt:
-        return explanations['FM']
-    if 'ohm' in q_lower and 'law' in q_lower:
-        return explanations['Ohm law']
-    
-    # Default: use the correct answer text with context
-    return f"{correct_answer_text}. This correctly addresses the safety principle, technical requirement, or operational procedure relevant to the question."
 
-def parse_questions(text):
-    """Parse all questions from the text"""
-    questions = []
-    
-    # Pattern to match question lines
-    # Format: T0A01 (B) Question text A. Option A B. Option B C. Option C D. Option D Correct Answer: B. Answer text
-    pattern = r'([T]\d+[A-Z]\d+)\s+\(([A-D])\)\s+(.+?)\s+A\.\s+(.+?)\s+B\.\s+(.+?)\s+C\.\s+(.+?)\s+D\.\s+(.+?)\s+Correct Answer:\s+([A-D])\.\s+(.+?)(?=\n[T]\d+[A-Z]\d+|\nGroup|\nSubelement|$)'
-    
-    matches = re.finditer(pattern, text, re.DOTALL | re.MULTILINE)
-    
-    for match in matches:
-        q_id = match.group(1)
-        initial_answer = match.group(2)
-        question = match.group(3).strip()
-        opt_a = match.group(4).strip()
-        opt_b = match.group(5).strip()
-        opt_c = match.group(6).strip()
-        opt_d = match.group(7).strip()
-        correct_letter = match.group(8)
-        correct_text = match.group(9).strip()
-        
-        # Clean up any trailing text in options
-        opt_a = re.sub(r'\s+Correct Answer:.*$', '', opt_a).strip()
-        opt_b = re.sub(r'\s+Correct Answer:.*$', '', opt_b).strip()
-        opt_c = re.sub(r'\s+Correct Answer:.*$', '', opt_c).strip()
-        opt_d = re.sub(r'\s+Correct Answer:.*$', '', opt_d).strip()
-        
-        options = [opt_a, opt_b, opt_c, opt_d]
-        explanation = generate_explanation(question, options, correct_letter, correct_text)
-        
-        questions.append({
-            'id': q_id,
-            'question': question,
-            'options': options,
-            'correctAnswer': correct_letter,
-            'explanation': explanation
-        })
-    
+ROOT = Path(__file__).resolve().parent
+DEFAULT_SOURCE = ROOT / "content" / "2026-2030-technician-pool-feb-19-2026.docx"
+DEFAULT_OUTPUT = ROOT / "my-study-app" / "app" / "ham_radio_questions.json"
+DEFAULT_LESSONS = ROOT / "my-study-app" / "app" / "lessons.json"
+
+QUESTION_HEADER = re.compile(r"^(T\d[A-Z]\d{2})\s+\(([A-D])\)")
+OPTION_LINE = re.compile(r"^([A-D])\.\s+(.*)$", re.DOTALL)
+FIGURE_REFERENCE = re.compile(r"\bfigure\s+(T-[123])\b", re.IGNORECASE)
+FIGURE_PATHS = {
+    "T-1": "/figures/technician-t1.jpg",
+    "T-2": "/figures/technician-t2.jpg",
+    "T-3": "/figures/technician-t3.jpg",
+}
+
+
+def extract_docx_paragraphs(path: Path) -> list[str]:
+    """Return visible DOCX paragraphs in document order using the standard library."""
+    with zipfile.ZipFile(path) as archive:
+        document = ElementTree.fromstring(archive.read("word/document.xml"))
+
+    word_namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    paragraphs: list[str] = []
+    for paragraph in document.iter(f"{word_namespace}p"):
+        text = "".join(
+            node.text or "" for node in paragraph.iter(f"{word_namespace}t")
+        ).strip()
+        if text:
+            paragraphs.append(text)
+    return paragraphs
+
+
+def _normalize_lines(text_or_lines: str | Iterable[str]) -> list[str]:
+    if isinstance(text_or_lines, str):
+        lines = text_or_lines.splitlines()
+    else:
+        lines = list(text_or_lines)
+    return [line.strip() for line in lines if line.strip()]
+
+
+def generate_explanation(
+    question: str,
+    options: list[str],
+    correct_answer_letter: str,
+) -> str:
+    """Generate a concise fallback explanation when no authored explanation exists."""
+    correct_answer = options[ord(correct_answer_letter) - ord("A")]
+    question_lower = question.lower()
+    answer_lower = correct_answer.lower()
+
+    if "battery" in question_lower and "short" in answer_lower:
+        return (
+            "Shorting battery terminals creates extremely high current, which can "
+            "cause burns, fire, or an explosion."
+        )
+    if "repeater" in question_lower and "offset" in question_lower:
+        return (
+            "Repeater offset is the difference between the repeater input and output "
+            "frequencies."
+        )
+    if "antenna" in question_lower and "polarization" in question_lower:
+        return (
+            "Matching transmit and receive antenna polarization maximizes signal transfer."
+        )
+    if "ohm" in question_lower and "law" in question_lower:
+        return "Ohm's Law is E = I × R, relating voltage, current, and resistance."
+    if "rf" in question_lower and "exposure" in question_lower:
+        return (
+            "RF exposure depends on frequency, power, distance, antenna pattern, and duty cycle."
+        )
+    return f"{correct_answer}."
+
+
+def parse_questions(
+    text_or_lines: str | Iterable[str],
+    explanations: dict[str, str] | None = None,
+) -> list[dict[str, object]]:
+    """Parse official NCVEC paragraph text into the app's question schema."""
+    lines = _normalize_lines(text_or_lines)
+    authored_explanations = explanations or {}
+    questions: list[dict[str, object]] = []
+
+    index = 0
+    while index < len(lines):
+        header = QUESTION_HEADER.match(lines[index])
+        if not header:
+            index += 1
+            continue
+
+        question_id, correct_answer = header.groups()
+        if index + 5 >= len(lines):
+            raise ValueError(f"Incomplete question block for {question_id}")
+
+        question_text = lines[index + 1]
+        options: list[str] = []
+        for option_index, expected_letter in enumerate("ABCD", start=2):
+            option_match = OPTION_LINE.match(lines[index + option_index])
+            if not option_match or option_match.group(1) != expected_letter:
+                raise ValueError(
+                    f"Expected option {expected_letter} for {question_id}; "
+                    f"found {lines[index + option_index]!r}"
+                )
+            options.append(option_match.group(2).strip())
+
+        entry: dict[str, object] = {
+            "id": question_id,
+            "question": question_text,
+            "options": options,
+            "correctAnswer": correct_answer,
+            "explanation": authored_explanations.get(question_id)
+            or generate_explanation(question_text, options, correct_answer),
+        }
+        figure_match = FIGURE_REFERENCE.search(question_text)
+        if figure_match:
+            entry["figure"] = FIGURE_PATHS[figure_match.group(1).upper()]
+        questions.append(entry)
+        index += 6
+
+    duplicate_ids = [
+        question_id
+        for question_id, count in Counter(question["id"] for question in questions).items()
+        if count != 1
+    ]
+    if duplicate_ids:
+        raise ValueError(f"Duplicate question IDs: {', '.join(sorted(duplicate_ids))}")
     return questions
 
-if __name__ == '__main__':
-    import sys
-    
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r', encoding='utf-8') as f:
-            text = f.read()
-    else:
-        # Read from stdin
-        text = sys.stdin.read()
-    
-    questions = parse_questions(text)
-    
-    print(json.dumps(questions, indent=2, ensure_ascii=False))
-    print(f"\nTotal questions parsed: {len(questions)}", file=sys.stderr)
+
+def existing_explanations(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    questions = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        question["id"]: question["explanation"]
+        for question in questions
+        if question.get("explanation")
+    }
 
 
+def derive_lesson_counts(questions: list[dict[str, object]]) -> dict[str, int]:
+    return dict(sorted(Counter(str(question["id"])[:2] for question in questions).items()))
 
+
+def update_lessons(lessons_path: Path, counts: dict[str, int]) -> dict[str, object]:
+    lessons_data = json.loads(lessons_path.read_text(encoding="utf-8"))
+    lesson_ids = {lesson["id"] for lesson in lessons_data["lessons"]}
+    if lesson_ids != set(counts):
+        raise ValueError("Lesson IDs do not match the question-pool subelements")
+    for lesson in lessons_data["lessons"]:
+        lesson["questionCount"] = counts[lesson["id"]]
+    return lessons_data
+
+
+def serialized_json(value: object) -> str:
+    return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+
+
+def build_content(source: Path, output: Path, lessons: Path) -> tuple[list[dict[str, object]], dict[str, object]]:
+    paragraphs = extract_docx_paragraphs(source)
+    questions = parse_questions(paragraphs, existing_explanations(output))
+    if len(questions) != 409:
+        raise ValueError(f"Expected 409 official questions, parsed {len(questions)}")
+    lessons_data = update_lessons(lessons, derive_lesson_counts(questions))
+    return questions, lessons_data
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--lessons", type=Path, default=DEFAULT_LESSONS)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Verify generated content matches checked-in output without writing files.",
+    )
+    args = parser.parse_args()
+
+    questions, lessons_data = build_content(args.source, args.output, args.lessons)
+    question_json = serialized_json(questions)
+    lesson_json = serialized_json(lessons_data)
+
+    if args.check:
+        mismatches = []
+        if args.output.read_text(encoding="utf-8") != question_json:
+            mismatches.append(str(args.output))
+        if args.lessons.read_text(encoding="utf-8") != lesson_json:
+            mismatches.append(str(args.lessons))
+        if mismatches:
+            print("Generated content differs: " + ", ".join(mismatches))
+            return 1
+        print("Content pipeline check passed: 409 questions, 35 groups, 10 lesson counts")
+        return 0
+
+    args.output.write_text(question_json, encoding="utf-8")
+    args.lessons.write_text(lesson_json, encoding="utf-8")
+    print(f"Generated {len(questions)} questions from {args.source}")
+    print("Lesson counts: " + ", ".join(f"{key}={value}" for key, value in derive_lesson_counts(questions).items()))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

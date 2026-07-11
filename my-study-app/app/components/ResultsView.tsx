@@ -1,6 +1,7 @@
 'use client';
 
 import { Question, Mode, SubelementStats, SpacedRepData } from '../types';
+import QuestionFigure from './QuestionFigure';
 
 interface ResultsViewProps {
   darkMode: boolean;
@@ -140,6 +141,11 @@ export default function ResultsView({
                         {bookmarked ? '★ Bookmarked' : '☆ Bookmark'}
                       </button>
                     </div>
+                    {q.figure && (
+                      <div className="mt-3">
+                        <QuestionFigure questionId={q.id} figure={q.figure} />
+                      </div>
+                    )}
                     <p className="mt-1 text-slate-400">
                       <span className="font-semibold">Correct answer: </span>{q.correctAnswer}
                     </p>

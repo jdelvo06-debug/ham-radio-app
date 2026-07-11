@@ -277,7 +277,7 @@
   },
   {
     "id": "T1C01",
-    "question": "Which amateur license classes are currently issued by the FCC?",
+    "question": "For which classes of amateur radio licenses does the FCC currently issue new licenses?",
     "options": [
       "Novice, Technician, General, Amateur Extra",
       "Technician, Technician Plus, General, Amateur Extra",
@@ -678,7 +678,7 @@
       "The person speaking or otherwise communicating messages over an amateur station",
       "The person who is the licensee of an amateur station",
       "An amateur operator identified in the FCC database as responsible for transmissions and FCC rules compliance at a station license location",
-      "An amateur operator designated by the licensee of a station to be responsible for transmissions and FCC rules"
+      "An amateur operator designated by the licensee of a station to be responsible for transmissions and FCC rules compliance at that station"
     ],
     "correctAnswer": "D",
     "explanation": "The control operator is a licensed individual appointed by the station licensee to ensure all transmissions follow the law. They are responsible for the station's technical and operational compliance with FCC rules."
@@ -774,7 +774,7 @@
       "A message from a control operator to another amateur station control operator on behalf of another person",
       "Amateur radio communications where three stations are in communications with one another",
       "Operation when the transmitting equipment is licensed to a person other than the control operator",
-      "Temporary authorization for an unlicensed person to transmit on the amateur bands for technical"
+      "Temporary authorization for an unlicensed person to transmit on the amateur bands for technical experiments"
     ],
     "correctAnswer": "A",
     "explanation": "This term refers to any message sent by an amateur station to another amateur station on behalf of a person who is not the control operator."
@@ -1182,7 +1182,7 @@
       "A group of licensed amateurs who have voluntarily registered their qualifications and equipment for communications duty in the public service",
       "A group of licensed amateurs who are members of the military and who voluntarily agreed to provide message handling services in the case of an emergency",
       "A training program that provides licensing courses for those interested in obtaining an amateur license to use during emergencies",
-      "A training program that certifies amateur operators for membership in the Radio Amateur Civil Emergency"
+      "A training program that certifies amateur operators for membership in the Radio Amateur Civil Emergency Service"
     ],
     "correctAnswer": "A",
     "explanation": "This is a volunteer organization sponsored by the ARRL that provides public service and emergency communications. Members register their skills and equipment to assist during local disasters."
@@ -2005,7 +2005,7 @@
   },
   {
     "id": "T5A05",
-    "question": "What is the electrical term for the force that causes electron flow?",
+    "question": "A difference in which of the following causes electron flow?",
     "options": [
       "Voltage",
       "Ampere-hours",
@@ -2333,7 +2333,7 @@
     "options": [
       "P = I x E",
       "P = E / I",
-      "P = I² x E",
+      "P = I2 x E",
       "P = I / E"
     ],
     "correctAnswer": "A",
@@ -2393,8 +2393,8 @@
     "options": [
       "I = E x R",
       "I = E / R",
-      "I = E² x R",
-      "I = E² / R"
+      "I = E2 x R",
+      "I = E2 / R"
     ],
     "correctAnswer": "B",
     "explanation": "Ohm's Law states that current is equal to the electromotive force divided by the resistance. Therefore, the formula is I equals E divided by R."
@@ -2405,8 +2405,8 @@
     "options": [
       "E = I x R",
       "E = I / R",
-      "E = I² x R",
-      "E = I² / R"
+      "E = I2 x R",
+      "E = I2 / R"
     ],
     "correctAnswer": "A",
     "explanation": "Electromotive force, or voltage, is calculated by multiplying current by resistance. This relationship is represented by the formula E equals I times R."
@@ -2661,7 +2661,8 @@
       "Double-pole double-throw"
     ],
     "correctAnswer": "A",
-    "explanation": "This symbol represents a basic on-off switch that controls a single electrical path by opening or closing a single set of contacts."
+    "explanation": "This symbol represents a basic on-off switch that controls a single electrical path by opening or closing a single set of contacts.",
+    "figure": "/figures/technician-t2.jpg"
   },
   {
     "id": "T6A10",
@@ -2853,7 +2854,8 @@
       "Connector"
     ],
     "correctAnswer": "A",
-    "explanation": "This zigzag symbol represents a component designed to provide a specific amount of electrical resistance. It is used to limit current or divide voltage in a circuit."
+    "explanation": "This zigzag symbol represents a component designed to provide a specific amount of electrical resistance. It is used to limit current or divide voltage in a circuit.",
+    "figure": "/figures/technician-t1.jpg"
   },
   {
     "id": "T6C03",
@@ -2865,7 +2867,8 @@
       "Connector"
     ],
     "correctAnswer": "B",
-    "explanation": "This symbol represents a three-terminal semiconductor device used for switching or amplification. The circle containing a line and arrows identifies it as a transistor."
+    "explanation": "This symbol represents a three-terminal semiconductor device used for switching or amplification. The circle containing a line and arrows identifies it as a transistor.",
+    "figure": "/figures/technician-t1.jpg"
   },
   {
     "id": "T6C04",
@@ -2877,7 +2880,8 @@
       "Ground symbol"
     ],
     "correctAnswer": "C",
-    "explanation": "This symbol represents an indicator light or lamp. The circle containing a loop or cross indicates a device that converts electrical energy into light."
+    "explanation": "This symbol represents an indicator light or lamp. The circle containing a loop or cross indicates a device that converts electrical energy into light.",
+    "figure": "/figures/technician-t1.jpg"
   },
   {
     "id": "T6C05",
@@ -2889,7 +2893,8 @@
       "Battery"
     ],
     "correctAnswer": "D",
-    "explanation": "The symbol consists of parallel lines representing electrical cells connected in series. This is the standard schematic representation for a DC voltage source."
+    "explanation": "The symbol consists of parallel lines representing electrical cells connected in series. This is the standard schematic representation for a DC voltage source.",
+    "figure": "/figures/technician-t1.jpg"
   },
   {
     "id": "T6C06",
@@ -2901,7 +2906,8 @@
       "Transistor"
     ],
     "correctAnswer": "B",
-    "explanation": "The symbol shows two parallel lines separated by a space, representing plates that store electrical charge. This is the standard schematic representation for a capacitor."
+    "explanation": "The symbol shows two parallel lines separated by a space, representing plates that store electrical charge. This is the standard schematic representation for a capacitor.",
+    "figure": "/figures/technician-t2.jpg"
   },
   {
     "id": "T6C07",
@@ -2913,7 +2919,8 @@
       "Light emitting diode"
     ],
     "correctAnswer": "D",
-    "explanation": "The symbol shows a triangle and bar with arrows pointing outward to represent light emission. This identifies the component as a diode that produces light when energized."
+    "explanation": "The symbol shows a triangle and bar with arrows pointing outward to represent light emission. This identifies the component as a diode that produces light when energized.",
+    "figure": "/figures/technician-t2.jpg"
   },
   {
     "id": "T6C08",
@@ -2925,7 +2932,8 @@
       "Variable transformer"
     ],
     "correctAnswer": "C",
-    "explanation": "The zigzag line represents a resistor, while the arrow indicates that its value is adjustable. This is the standard symbol for a variable resistor or potentiometer."
+    "explanation": "The zigzag line represents a resistor, while the arrow indicates that its value is adjustable. This is the standard symbol for a variable resistor or potentiometer.",
+    "figure": "/figures/technician-t2.jpg"
   },
   {
     "id": "T6C09",
@@ -2937,7 +2945,8 @@
       "Transformer"
     ],
     "correctAnswer": "D",
-    "explanation": "This symbol shows two coils linked by a common core, which transfers energy between circuits via magnetic fields. It is used to step voltage up or down."
+    "explanation": "This symbol shows two coils linked by a common core, which transfers energy between circuits via magnetic fields. It is used to step voltage up or down.",
+    "figure": "/figures/technician-t2.jpg"
   },
   {
     "id": "T6C10",
@@ -2949,7 +2958,8 @@
       "Variable inductor"
     ],
     "correctAnswer": "D",
-    "explanation": "The looped lines represent an inductor, and the diagonal arrow indicates that its inductance value is adjustable. This allows for tuning the circuit's resonant frequency."
+    "explanation": "The looped lines represent an inductor, and the diagonal arrow indicates that its inductance value is adjustable. This allows for tuning the circuit's resonant frequency.",
+    "figure": "/figures/technician-t3.jpg"
   },
   {
     "id": "T6C11",
@@ -2961,7 +2971,8 @@
       "Ground"
     ],
     "correctAnswer": "A",
-    "explanation": "The branching symbol at the end of the circuit represents the point where radio frequency energy is radiated into space. This is the standard symbol for an antenna."
+    "explanation": "The branching symbol at the end of the circuit represents the point where radio frequency energy is radiated into space. This is the standard symbol for an antenna.",
+    "figure": "/figures/technician-t3.jpg"
   },
   {
     "id": "T6C12",
@@ -3093,7 +3104,8 @@
       "Convert electrical energy into radio waves"
     ],
     "correctAnswer": "C",
-    "explanation": "The symbol represents a transistor, which functions as an electronic switch or variable valve. It uses a small input signal to regulate the amount of current flowing through the device."
+    "explanation": "The symbol represents a transistor, which functions as an electronic switch or variable valve. It uses a small input signal to regulate the amount of current flowing through the device.",
+    "figure": "/figures/technician-t1.jpg"
   },
   {
     "id": "T6D11",
@@ -3205,7 +3217,7 @@
   },
   {
     "id": "T7A09",
-    "question": "What is the function of the switch which selects either SSB or CW-FM on a VHF power amplifier?",
+    "question": "What is the function of the switch which selects either SSB or CW-FM on some VHF power amplifiers?",
     "options": [
       "Change the mode of the transmitted signal",
       "Set the amplifier for proper operation in the selected mode",
@@ -3366,7 +3378,7 @@
       "Adding extra feedline to the antenna to lower SWR",
       "Turning the radio on and off to reset the computer-controlled circuitry",
       "Adding a clip-on ferrite “choke” to the microphone cable to prevent the transmitted signal from feeding back into the transmitter",
-      "Turning the squelch control fully clockwise to prevent the transmitted signal from triggering the squelch"
+      "Turning the squelch control fully clockwise to prevent the transmitted signal from triggering the squelch circuit"
     ],
     "correctAnswer": "C",
     "explanation": "RF energy can sometimes leak into the microphone circuit and cause feedback distortion. A ferrite choke acts as a high-impedance barrier that blocks these radio currents from entering the audio path."
@@ -4237,7 +4249,7 @@
   },
   {
     "id": "T9A04",
-    "question": "What is a disadvantage of a handheld radio transceiver’s short flexible antenna compared to a full-sized quarter- wave antenna?",
+    "question": "What is a disadvantage of a handheld radio transceiver’s short flexible antenna compared to a full-sized quarter-wave antenna?",
     "options": [
       "It has low efficiency",
       "It transmits only circularly polarized signals",
@@ -4585,7 +4597,7 @@
   },
   {
     "id": "T0A10",
-    "question": "What hazard occurs when rapidly charging or discharging an unprotected battery?",
+    "question": "What hazard exists when rapidly charging or discharging an unprotected battery?",
     "options": [
       "Overheating or out-gassing",
       "Excess output ripple",

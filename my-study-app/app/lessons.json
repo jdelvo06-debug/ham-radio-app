@@ -54,7 +54,7 @@
         }
       ],
       "examTip": "The three critical numbers: 100mA can kill, 30-300 MHz is most restrictive, and GFCI protects people while fuses protect equipment.",
-      "questionCount": 35
+      "questionCount": 36
     },
     {
       "id": "T1",
@@ -111,7 +111,7 @@
         }
       ],
       "examTip": "Key numbers: 10 years license, 2-year grace (no TX), 200W on HF, 1500W on VHF+. And willful interference is NEVER allowed!",
-      "questionCount": 45
+      "questionCount": 68
     },
     {
       "id": "T2",
@@ -176,7 +176,7 @@
         }
       ],
       "examTip": "Memorize: 146.520 MHz (2m simplex), 600 kHz (2m offset), 5 MHz (70cm offset). ARES=volunteer, RACES=government.",
-      "questionCount": 40
+      "questionCount": 37
     },
     {
       "id": "T3",
@@ -241,7 +241,7 @@
         }
       ],
       "examTip": "Key formula: λ = 300/MHz. Meteor scatter = 6 meters. VHF/UHF = line-of-sight. 30-300 MHz = VHF range.",
-      "questionCount": 40
+      "questionCount": 35
     },
     {
       "id": "T4",
@@ -315,7 +315,7 @@
         }
       ],
       "examTip": "RIT = Receive only changes. SWR meter goes BETWEEN radio and antenna. VOX = voice-activated transmit.",
-      "questionCount": 35
+      "questionCount": 23
     },
     {
       "id": "T5",
@@ -380,7 +380,7 @@
         }
       ],
       "examTip": "Memorize: E=IR and P=IE (PIE). +3dB = 2× power, +10dB = 10× power. Standard impedance = 50 ohms.",
-      "questionCount": 45
+      "questionCount": 50
     },
     {
       "id": "T6",
@@ -445,7 +445,7 @@
         }
       ],
       "examTip": "Capacitor blocks DC/passes AC. Inductor blocks AC/passes DC - they're OPPOSITES! BJT = B/C/E, FET = G/D/S.",
-      "questionCount": 45
+      "questionCount": 46
     },
     {
       "id": "T7",
@@ -510,7 +510,7 @@
         }
       ],
       "examTip": "SWR 1:1 is perfect. Ferrite chokes solve RFI. Sensitivity = weak signals, Selectivity = adjacent signals.",
-      "questionCount": 40
+      "questionCount": 44
     },
     {
       "id": "T8",
@@ -575,7 +575,7 @@
         }
       ],
       "examTip": "Bandwidth order: CW (narrowest) → SSB → FM (widest). FT8 = 50 Hz, 15-second cycles. APRS = 144.390 MHz.",
-      "questionCount": 40
+      "questionCount": 47
     },
     {
       "id": "T9",
@@ -640,7 +640,7 @@
         }
       ],
       "examTip": "Dipole formula: 468/MHz. Yagi: Reflector=longest, Director=shortest. dBi = dBd + 2.15. PL-259 for HF, Type N for VHF/UHF.",
-      "questionCount": 35
+      "questionCount": 23
     }
   ]
 }

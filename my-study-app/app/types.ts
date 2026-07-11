@@ -4,6 +4,7 @@ export interface Question {
   options: string[];
   correctAnswer: string;
   explanation: string;
+  figure?: string;
 }
 
 export interface SubelementStats {

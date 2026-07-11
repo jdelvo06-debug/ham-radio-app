@@ -12,11 +12,11 @@
 
 *This is the core product. If the exam sim is wrong, nothing else matters.*
 
-- [ ] **1.1 Fix exam blueprint.** Exam mode currently shuffles all 409 questions uniformly (`page.tsx:653`). Implement official NCVEC subelement/group distribution (35 questions per the fixed syllabus blueprint). This is the #1 release blocker for an exam study app.
-- [ ] **1.2 Apply 4 errata corrections.** T0A10, T1C01, T5A05, T7A09 — update wording to match official 2026–2030 pool.
-- [ ] **1.3 Fix 4 truncated option strings.** T1E11-D, T1F08-D, T2C06-D, T7B11-D.
-- [ ] **1.4 Add question diagrams.** 13 figure-dependent questions (T-1/T-2/T-3) have no images. Add a `figure` field to the data model, source the official figures, and render them in Study/Exam/Review modes.
-- [ ] **1.5 Consolidate content pipeline.** Kill duplicate/incomplete parsers. Make `generate_complete_json.py` the single source, fix case-sensitivity branches that never match, ensure lesson question counts are derived from the pool (not hardcoded).
+- [x] **1.1 Fix exam blueprint.** Exam mode now selects one question from each of the official NCVEC syllabus groups, producing the fixed 35-question distribution.
+- [x] **1.2 Apply 4 errata corrections.** T0A10, T1C01, T5A05, T7A09 match the corrected official 2026–2030 pool.
+- [x] **1.3 Fix 4 truncated option strings.** T1E11-D, T1F08-D, T2C06-D, T7B11-D match the corrected official pool.
+- [x] **1.4 Add question diagrams.** The corrected official pool contains 12 figure-dependent questions (not 13) referencing T-1/T-2/T-3. The data model includes a `figure` field and Study/Exam/Review modes render the official figures.
+- [x] **1.5 Consolidate content pipeline.** `generate_complete_json.py` is the single content source, case-sensitive dead branches are removed, and lesson question counts are derived from the pool.
 
 **Verification:** Exam composition matches official blueprint. All 409 IDs + answer keys match official pool. Lesson counts accurate. Diagrams render on all affected questions.
 

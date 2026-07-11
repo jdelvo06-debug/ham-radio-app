@@ -1,6 +1,7 @@
 'use client';
 
 import { Question, Mode, SpacedRepData } from '../types';
+import QuestionFigure from './QuestionFigure';
 
 interface QuizViewProps {
   darkMode: boolean;
@@ -56,7 +57,9 @@ export default function QuizView({
                 {modeLabel}
               </span>
               <div className="text-xs text-slate-500 mt-0.5">
-                {selectedSubelement === 'ALL'
+                {mode === 'exam'
+                  ? 'Official 35-group blueprint'
+                  : selectedSubelement === 'ALL'
                   ? 'All subelements'
                   : `Subelement ${selectedSubelement}`}
               </div>
@@ -92,6 +95,10 @@ export default function QuizView({
           </span>
           {currentQuestion.question}
         </h2>
+
+        {currentQuestion.figure && (
+          <QuestionFigure questionId={currentQuestion.id} figure={currentQuestion.figure} eager />
+        )}
 
         {/* Answer options */}
         <div className="space-y-3">

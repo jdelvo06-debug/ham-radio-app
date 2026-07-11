@@ -35,6 +35,7 @@ import SettingsView from './components/SettingsView';
 import PaywallModal from './components/PaywallModal';
 import { usePremium } from './hooks/usePremium';
 import { getDailyQuestionsRemaining, incrementDailyCount, resetIfNewDay } from './utils/freeLimit';
+import { selectOfficialExamQuestions } from './utils/examBlueprint';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('menu');
@@ -188,7 +189,18 @@ export default function Home() {
 
   const subelements = getAvailableSubelements();
 
-  const lessons = (lessonsData as LessonsFile).lessons;
+  const questionCountsBySubelement = (questionsData as Question[]).reduce<Record<string, number>>(
+    (counts, question) => {
+      const subelement = question.id.slice(0, 2);
+      counts[subelement] = (counts[subelement] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
+  const lessons = (lessonsData as LessonsFile).lessons.map((lesson) => ({
+    ...lesson,
+    questionCount: questionCountsBySubelement[lesson.id] ?? 0,
+  }));
 
   const isLessonCompleted = (id: string): boolean => completedLessons.includes(id);
 
@@ -636,7 +648,9 @@ export default function Home() {
     setSubelementStats({});
 
     const source: 'all' | 'bookmarks' = selectedMode === 'bookmarks' ? 'bookmarks' : 'all';
-    const pool = buildQuestionPool(source);
+    const pool = selectedMode === 'exam'
+      ? (questionsData as Question[])
+      : buildQuestionPool(source);
 
     if (selectedMode === 'bookmarks' && pool.length === 0) {
       alert('No bookmarked questions match this subelement filter.');
@@ -650,9 +664,10 @@ export default function Home() {
       return;
     }
 
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    const limit = selectedMode === 'exam' ? Math.min(35, shuffled.length) : shuffled.length;
-    setActiveQuestions(shuffled.slice(0, limit));
+    const selectedQuestions = selectedMode === 'exam'
+      ? selectOfficialExamQuestions(pool)
+      : [...pool].sort(() => 0.5 - Math.random());
+    setActiveQuestions(selectedQuestions);
   };
 
   const startRetryMissed = () => {
