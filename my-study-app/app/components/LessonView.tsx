@@ -3,7 +3,6 @@
 import { Lesson } from '../types';
 
 interface LessonViewProps {
-  darkMode: boolean;
   currentLesson: Lesson;
   completed: boolean;
   lessons: Lesson[];

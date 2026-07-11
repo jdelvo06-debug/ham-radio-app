@@ -78,7 +78,6 @@ export const LS_BOOKMARKS_KEY = 'ham_technician_bookmarks';
 export const LS_GLOBAL_STATS_KEY = 'ham_technician_global_stats';
 export const LS_COMPLETED_LESSONS_KEY = 'ham_technician_completed_lessons';
 export const LS_SPACED_REP_KEY = 'ham_technician_spaced_rep';
-export const LS_DARK_MODE_KEY = 'ham_technician_dark_mode';
 export const LS_STREAK_KEY = 'ham_technician_streak';
 export const LS_ONBOARDING_KEY = 'ham_technician_onboarding_complete';
 
