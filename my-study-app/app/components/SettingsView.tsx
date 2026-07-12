@@ -137,6 +137,25 @@ export default function SettingsView({
           </div>
         </div>
 
+        {/* Privacy */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
+            Privacy
+          </h3>
+          <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700/50 text-sm text-slate-400 space-y-2">
+            <p>Your study progress and preferences are stored only on this device.</p>
+            <p>No account is required. The app does not track you or use third-party analytics.</p>
+            <a
+              href="https://jdelvo06-debug.github.io/ham-radio-app/privacy/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block font-medium text-sky-400 hover:text-sky-300"
+            >
+              Read the Privacy Policy
+            </a>
+          </div>
+        </div>
+
         {/* About */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">

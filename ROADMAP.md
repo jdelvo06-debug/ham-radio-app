@@ -66,13 +66,13 @@
 
 *Final gates before App Store update submission.*
 
-- [ ] **5.1 Privacy policy update.** Mention Google Play billing if Android distribution is intended. Ensure iOS privacy nutrition labels are accurate (local-only data, no tracking).
-- [ ] **5.2 Deployed browser smoke test.** Add test that verifies CSS/JS assets, hydration, manifest, service worker, and one question transition — not just artifact upload. (Applies to whatever web deploy we keep.)
-- [ ] **5.3 GitHub Pages fix (optional/low priority).** If we keep a web demo, add `basePath`/`assetPrefix` for `/ham-radio-app/` hosting. If not, remove the deploy workflow to avoid confusion.
-- [ ] **5.4 Android Gradle verification.** Needs Java runtime on build host. Run Android tests + lint before any Play Store submission.
-- [ ] **5.5 Final App Store review checklist.** Screenshots, metadata, age rating, privacy answers, TestFlight beta round.
+- [x] **5.1 Privacy policy update.** In-app and standalone copy now covers local-only data, no account, no tracking/third-party analytics, Apple App Store purchases, and intended Google Play Billing. The public policy URL still requires release-owner publication/confirmation.
+- [x] **5.2 Deployed browser smoke test.** `npm run smoke:static` serves the real static export and verifies CSS/JS, hydration, manifest, service worker readiness, and a question 1-to-2 transition in Chromium.
+- [x] **5.3 GitHub Pages fix (optional/low priority).** Removed the obsolete full-app GitHub Pages deployment workflow; GitHub Pages is not an app release target.
+- [x] **5.4 Android Gradle verification.** Added a local config/JDK/Gradle gate and CI with JDK 21 running Android unit tests plus lint. Local Gradle execution remains blocked until this Mac has a working Java runtime.
+- [x] **5.5 Final App Store review checklist.** `RELEASE_CHECKLIST.md` covers screenshots, metadata, age rating, privacy answers, purchase risks, a TestFlight beta round, version/build bumps, and audit-derived Apple review gates.
 
-**Verification:** Privacy policy current. Smoke test green. App Store metadata reviewed. TestFlight build submitted.
+**Repository verification:** Privacy source current; static browser smoke green; Android config check green with local Java unavailable. App Store metadata review, public privacy-policy publication, TestFlight beta sign-off, and submission remain release-owner gates in `RELEASE_CHECKLIST.md`.
 
 ---
 

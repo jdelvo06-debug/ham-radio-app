@@ -1,6 +1,6 @@
 # Ham Radio Study Buddy
 
-Next.js + Capacitor app for studying the FCC Amateur Radio Technician exam on web and iOS.
+Next.js + Capacitor app for studying the FCC Amateur Radio Technician exam on web, iOS, and Android.
 
 ## Current release status
 
@@ -49,6 +49,32 @@ StoreKit test config lives at:
 ```text
 ios/App/App/Products.storekit
 ```
+
+## Release verification
+
+Verify the static export in a real browser:
+
+```bash
+npm run build
+npx playwright install chromium # one-time local browser install
+npm run smoke:static
+```
+
+The smoke test serves `out/` locally and verifies CSS/JavaScript responses,
+React hydration, the web manifest, service-worker registration, and a real
+Study Mode transition from question 1 to question 2.
+
+Android verification requires a working JDK 21 runtime, `JAVA_HOME` pointing to
+that JDK, and an Android SDK available through `ANDROID_HOME` or
+`ANDROID_SDK_ROOT`. Run:
+
+```bash
+npm run verify:android
+```
+
+The command checks the Gradle wrapper and Android configuration before running
+Gradle unit tests and lint. GitHub Actions provides JDK 21 and runs this gate on
+pull requests and updates to `main`.
 
 ## Important current files
 

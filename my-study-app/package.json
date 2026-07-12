@@ -7,6 +7,8 @@
     "build": "next build --webpack",
     "build:mobile": "npm run build && cap sync",
     "start": "serve out -l 4000",
+    "smoke:static": "node scripts/smoke-static.mjs",
+    "verify:android": "bash scripts/verify-android.sh",
     "lint": "eslint",
     "test": "vitest run"
   },
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
