@@ -1,99 +1,73 @@
-# Ham Radio Study App — Phased Roadmap to App Store Quality
+# Ham Radio Study App — Completed Quality Remediation Roadmap
 
 **Created:** 2026-07-11
-**Source:** Full project audit by GPT-5.6 (Codex), adjusted per Jeremy's guidance.
-**End state:** Accurate exam sim, clean mobile build pipeline, accessible UI, validated content pipeline, App Store update ready.
+**Updated:** 2026-07-12
+**Result:** All five engineering/release-preparation phases are complete. App Store version **1.3.0 (3)** is **Waiting for Review** with manual release selected.
 
-> **Note:** This app is already published to the App Store. GitHub Pages was the pre-App-Store web deployment only — it is not a release target. Any agent working this roadmap should treat the App Store / Capacitor / iOS path as primary.
-
----
-
-## Phase 1 — Content Accuracy (Exam Integrity)
-
-*This is the core product. If the exam sim is wrong, nothing else matters.*
-
-- [x] **1.1 Fix exam blueprint.** Exam mode now selects one question from each of the official NCVEC syllabus groups, producing the fixed 35-question distribution.
-- [x] **1.2 Apply 4 errata corrections.** T0A10, T1C01, T5A05, T7A09 match the corrected official 2026–2030 pool.
-- [x] **1.3 Fix 4 truncated option strings.** T1E11-D, T1F08-D, T2C06-D, T7B11-D match the corrected official pool.
-- [x] **1.4 Add question diagrams.** The corrected official pool contains 12 figure-dependent questions (not 13) referencing T-1/T-2/T-3. The data model includes a `figure` field and Study/Exam/Review modes render the official figures.
-- [x] **1.5 Consolidate content pipeline.** `generate_complete_json.py` is the single content source, case-sensitive dead branches are removed, and lesson question counts are derived from the pool.
-
-**Verification:** Exam composition matches official blueprint. All 409 IDs + answer keys match official pool. Lesson counts accurate. Diagrams render on all affected questions.
+> The App Store / Capacitor route is primary. The old GitHub Pages deployment was removed and is not a release target.
 
 ---
 
-## Phase 2 — Build & Mobile Pipeline
+## Phase 1 — Content Accuracy ✅
 
-*Get the Capacitor → Xcode → App Store chain clean.*
+- [x] Official 35-group NCVEC practice-exam blueprint
+- [x] Corrected 2026–2030 pool: 409 official IDs and answer keys
+- [x] Four errata and four truncated options corrected
+- [x] Twelve official figure-dependent questions mapped to T-1/T-2/T-3 assets
+- [x] One canonical content generator with derived lesson counts
 
-- [ ] **2.1 Fix `build:mobile`.** `next export` was removed from package.json scripts. Reconcile build contract — one build command, static export, Capacitor sync, Xcode compile.
-- [ ] **2.2 Remove or replace `npm start`.** Incompatible with `output: 'export'`. Replace with a static server command for local dev convenience or remove from workflow.
-- [ ] **2.3 Align version numbers.** UI says 1.3.0, npm says 0.1.0, iOS says 1.0. Pick one versioning scheme and sync across package.json, iOS project, Android project, and in-app display.
-- [ ] **2.4 Upgrade Next.js** from 16.0.10 to latest, rerun security audit (7 advisories, mostly tooling-side).
-- [ ] **2.5 Add test baseline.** Cover: exam composition, pool integrity (ID + answer key), import schema validation, entitlement states, persistence migrations, primary navigation.
+**Verified:** content integrity suite; exam-blueprint tests; static build; visual figure smoke.
 
-**Verification:** `build:mobile` succeeds end-to-end (build → cap sync → Xcode compile). `npm run lint` clean. Tests pass.
+## Phase 2 — Build & Mobile Pipeline ✅
 
----
+- [x] Static-export-compatible `build:mobile` and `npm start`
+- [x] Marketing version aligned at 1.3.0; native build counters tracked per platform
+- [x] Next.js upgraded to 16.2.10
+- [x] Vitest baseline added for app correctness/regression coverage
+- [x] Capacitor sync and iOS compilation verified
 
-## Phase 3 — App Correctness & Security
+**Verified:** tests, lint, TypeScript, static build, Capacitor sync, iOS compile.
 
-*Real bugs that can crash the app or leak premium.*
+## Phase 3 — App Correctness & Security ✅
 
-- [ ] **3.1 Fix Android entitlement logic.** `usePremium.ts:44` grants premium without requiring `purchaseState === PURCHASED` and acknowledgement. A pending unacknowledged transaction passes the check. Tighten the predicate.
-- [ ] **3.2 Schema-validate imports.** `page.tsx:474` import path only checks truthiness — a crafted `{globalStats:{T1:null}}` crashes the reducer and persists across reloads. Add proper validation before state/storage writes.
-- [ ] **3.3 Fix Analytics launch race.** `AnalyticsView.tsx:71` sets subelement and immediately calls `startQuiz()`, which reads stale React state (`page.tsx:591`). Weak-area buttons can launch the wrong question pool. Use `useEffect` or callback ref.
-- [ ] **3.4 Guard native purchase calls on web.** `isBillingSupported` logs to browser console. Gate billing calls behind platform detection.
+- [x] Android Premium entitlement requires purchased and acknowledged state
+- [x] Import schema validation and legacy persistence migration
+- [x] Analytics weak-area race removed with atomic subelement quiz start
+- [x] Native billing calls gated off on web
 
-**Verification:** Crafted import rejected gracefully. Weak-area quiz launches correct pool. Entitlement requires verified purchase. No console errors on web.
+**Verified:** targeted regression tests, full app tests, lint, and static build.
 
----
+## Phase 4 — UX and Accessibility ✅
 
-## Phase 4 — UX Polish & Accessibility
+- [x] Incomplete light mode removed; dark-first UI is deliberate
+- [x] Onboarding dialog semantics, focus behavior, Escape handling, and named controls
+- [x] Semantic quiz progress and live answer feedback
+- [x] Lint debt eliminated; lesson counts verified as pool-derived
 
-*App Store review cares about accessibility. Make it clean.*
+**Verified:** 22 accessibility/UI regression tests, static build, lint, browser keyboard smoke.
 
-- [ ] **4.1 Decide on light mode: finish or remove.** Toggle exists (`SettingsView.tsx:64`) but major views hardcode dark colors and several `darkMode` props are unused. Either complete theming or strip the toggle.
-- [ ] **4.2 Accessibility pass.** Theme toggle needs accessible name/state. Onboarding modal needs dialog semantics, focus trapping, Escape handling, named slide controls (`OnboardingModal.tsx:19`). Progress bars need semantic `value` attributes (`QuizView.tsx:80`). Answer feedback needs `aria-live` strategy.
-- [ ] **4.3 Fix lint.** `Date.now()` during render error (`page.tsx:275`), 6 unused-prop warnings.
-- [ ] **4.4 Replace stale lesson counts** with values derived from the question pool (overlaps Phase 1 content pipeline).
+## Phase 5 — Release Preparation ✅
 
-**Verification:** Lint clean. Accessibility audit ( axe or manual) passes. Light mode either fully works or toggle is removed.
+- [x] Privacy/support disclosures updated for local-only data and Apple/Google purchase handling
+- [x] Chromium static-export smoke test added
+- [x] Obsolete GitHub Pages deploy workflow removed
+- [x] Release CI added: web checks plus Android Gradle test/lint with JDK 21
+- [x] Reusable `RELEASE_CHECKLIST.md` created
 
----
+**Verified:** release CI passed web smoke and Android Gradle test/lint; store-signed IPA uploaded.
 
-## Phase 5 — Release Prep
+## App Store state
 
-*Final gates before App Store update submission.*
+| Item | State |
+|---|---|
+| Candidate | 1.3.0 (3) |
+| App Store Connect | Waiting for Review |
+| Release control | Manual |
+| Next decision | Release after Apple approval, or resolve any review feedback |
 
-- [x] **5.1 Privacy policy update.** In-app and standalone copy now covers local-only data, no account, no tracking/third-party analytics, Apple App Store purchases, and intended Google Play Billing. The public policy URL still requires release-owner publication/confirmation.
-- [x] **5.2 Deployed browser smoke test.** `npm run smoke:static` serves the real static export and verifies CSS/JS, hydration, manifest, service worker readiness, and a question 1-to-2 transition in Chromium.
-- [x] **5.3 GitHub Pages fix (optional/low priority).** Removed the obsolete full-app GitHub Pages deployment workflow; GitHub Pages is not an app release target.
-- [x] **5.4 Android Gradle verification.** Added a local config/JDK/Gradle gate and CI with JDK 21 running Android unit tests plus lint. Local Gradle execution remains blocked until this Mac has a working Java runtime.
-- [x] **5.5 Final App Store review checklist.** `RELEASE_CHECKLIST.md` covers screenshots, metadata, age rating, privacy answers, purchase risks, a TestFlight beta round, version/build bumps, and audit-derived Apple review gates.
+## Preserve
 
-**Repository verification:** Privacy source current; static browser smoke green; Android config check green with local Java unavailable. App Store metadata review, public privacy-policy publication, TestFlight beta sign-off, and submission remain release-owner gates in `RELEASE_CHECKLIST.md`.
-
----
-
-## Leave Alone
-
-- Static-export / offline-first architecture ✓
-- Local-only study data model (no backend, no tracking) ✓
-- Current responsive mobile layout ✓
-- Bundled 409-question dataset ✓
-
----
-
-## Sequencing
-
-**Phase 1** → content is king, fix the exam sim first.
-**Phase 2** → build pipeline, so we can ship updates.
-**Phase 3 + Phase 4** → can run in parallel (correctness + UX).
-**Phase 5** → final gate before submission.
-
-## Agent Instructions
-
-When picking up a phase or task, read this file plus `AGENTS.md` and `CLAUDE.md` in the repo root for project conventions. Verify current git status and branch before making changes. Report completion of each checkbox with real verification output — not just "done."
-
-Cortana (Hermes) is the orchestrator for this roadmap. Implementation work runs through fresh Codex sessions; Cortana handles QA, review, commits, and progress tracking.
+- Static-export/offline-first architecture
+- Local-only study data model
+- Responsive mobile layout
+- Corrected official 409-question dataset and 35-group exam blueprint

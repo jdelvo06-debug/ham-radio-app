@@ -1,92 +1,62 @@
 # Ham Radio Study Buddy
 
-Next.js + Capacitor app for studying the FCC Amateur Radio Technician exam on web, iOS, and Android.
+Next.js + Capacitor study app for the official FCC Amateur Radio Technician exam. The app is static-exported, works offline after install, and ships to iOS through the App Store.
 
-## Current release status
+## Current release
 
-As of 2026-04-20:
-- freemium/premium gating is wired into the app
-- StoreKit 2 purchase flow is integrated through `@capgo/native-purchases`
-- local StoreKit simulator purchase testing succeeded and premium unlocked correctly
-- restore purchase was flaky in the simulator and still needs a better validation pass
-- an iOS archive was created and uploaded to App Store Connect
+- **App Store:** version **1.3.0 (3)** is **Waiting for Review** with manual release selected.
+- **Pool:** corrected official 2026–2030 Technician pool, **409 questions**.
+- **Practice exams:** one question from each official NCVEC syllabus group (35 total).
+- **Data:** local-only study data; no account, tracking, ads, or analytics service.
 
-## Key app details
-
-- Bundle ID: `com.studybuddy.hamradio`
-- App Store name: **Ham Radio Study Buddy**
-- Premium product ID: `com.studybuddy.hamradio.premium`
-- Free tier: 25 questions/day
-- Premium unlock: non-consumable one-time purchase
-
-## Getting started
-
-Run the local dev server:
+## Run locally
 
 ```bash
+npm ci
 npm run dev
 ```
 
-Open [http://localhost:4000](http://localhost:4000).
+Open <http://localhost:4000>.
 
-## Mobile / iOS workflow
+On this Apple Silicon host, run native-module tooling with ARM Node:
 
-Build web assets and sync to Capacitor:
+```bash
+PATH="/opt/homebrew/bin:$PATH" npm test
+```
+
+## Verify
+
+```bash
+npm run lint
+npm test
+npm run build
+npm run smoke:static
+npm run build:mobile
+```
+
+`smoke:static` verifies the actual static export: assets, hydration, manifest, service worker, and a Study Mode question transition.
+
+## Mobile workflow
 
 ```bash
 npm run build:mobile
-npx cap sync ios
-```
-
-Open the iOS project:
-
-```bash
 open ios/App/App.xcodeproj
 ```
 
-StoreKit test config lives at:
+`build:mobile` runs the static build and Capacitor sync. Do not run `next export` separately. The app uses `output: 'export'`, so `npm start` serves `out/` and `next start` is not valid.
 
-```text
-ios/App/App/Products.storekit
-```
+## Release gates
 
-## Release verification
+- GitHub Actions runs web lint/tests/build/smoke plus Android Gradle test/lint.
+- Full App Store release procedure: [`../RELEASE_CHECKLIST.md`](../RELEASE_CHECKLIST.md)
+- Project state and constraints: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md) and [`../AGENTS.md`](../AGENTS.md)
 
-Verify the static export in a real browser:
+## Key files
 
-```bash
-npm run build
-npx playwright install chromium # one-time local browser install
-npm run smoke:static
-```
-
-The smoke test serves `out/` locally and verifies CSS/JavaScript responses,
-React hydration, the web manifest, service-worker registration, and a real
-Study Mode transition from question 1 to question 2.
-
-Android verification requires a working JDK 21 runtime, `JAVA_HOME` pointing to
-that JDK, and an Android SDK available through `ANDROID_HOME` or
-`ANDROID_SDK_ROOT`. Run:
-
-```bash
-npm run verify:android
-```
-
-The command checks the Gradle wrapper and Android configuration before running
-Gradle unit tests and lint. GitHub Actions provides JDK 21 and runs this gate on
-pull requests and updates to `main`.
-
-## Important current files
-
-- `app/hooks/usePremium.ts`
-- `app/components/PaywallModal.tsx`
-- `app/components/SettingsView.tsx`
-- `app/page.tsx`
-- `ios/App/App/Products.storekit`
-
-## Next steps
-
-1. Wait for the uploaded App Store Connect build to finish processing
-2. Complete TestFlight / App Review setup
-3. Attach `com.studybuddy.hamradio.premium` to the app submission if Apple requires it on the version record
-4. Re-test restore purchases in a less flaky environment than local simulator StoreKit
+- `app/page.tsx` — main state coordinator
+- `app/ham_radio_questions.json` — bundled official question data
+- `app/utils/examBlueprint.ts` — official practice-exam selection
+- `app/components/QuestionFigure.tsx` — T-1/T-2/T-3 figure rendering
+- `app/hooks/usePremium.ts` — native purchase integration
+- `scripts/smoke-static.mjs` — browser release smoke
+- `scripts/verify-android.sh` — Android config/Gradle gate

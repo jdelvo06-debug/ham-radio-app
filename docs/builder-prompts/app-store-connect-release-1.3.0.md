@@ -1,38 +1,20 @@
-# Codex Task — Apple Developer / TestFlight Release Operations
+# App Store Connect Release Handoff — Complete
 
-You own the Apple Developer and App Store Connect portion of the Ham Radio Study Buddy update. Cortana has already completed engineering QA and uploaded the signed build.
+**Original task:** take Ham Radio Study Buddy version 1.3.0 through App Store Connect/TestFlight preparation.
 
-## Verified state
+## Final status — 2026-07-12
 
-- App: **Ham Radio Study Buddy**
-- Bundle ID: `com.studybuddy.hamradio`
-- Uploaded build: **1.3.0 (2)**
-- Xcode upload result: **Upload succeeded; package is processing**
-- GitHub release verification: web build/smoke and Android Gradle test/lint are green.
-- Repo: `~/projects/ham-radio-app`
-- Release checklist: `RELEASE_CHECKLIST.md`
+- Submitted candidate: **1.3.0 (3)**
+- App Store Connect status: **Waiting for Review**
+- Release control: **manual**
+- Engineering release CI: web smoke and Android Gradle/lint passed
 
-## Your job
+This is a completed handoff record, not an active task prompt.
 
-Use App Store Connect / Apple Developer tools to take this update from processing to TestFlight-ready.
+## Remaining release-owner action
 
-1. Verify build `1.3.0 (2)` appears and finishes processing in App Store Connect.
-2. Inspect and resolve any Apple processing warnings, missing compliance items, export-compliance questions, SDK privacy manifests, or required metadata blocks.
-3. Review the TestFlight configuration: release notes, internal tester access, and any beta review requirement. Use accurate release notes based on the shipped work; do not invent features.
-4. Review the existing App Store version metadata against `RELEASE_CHECKLIST.md`: privacy, age rating, support/privacy URLs, screenshots, description, and in-app purchase disclosures.
-5. Make non-destructive configuration fixes that are clearly required for this update.
+Wait for Apple’s decision. If Apple approves the update, do not publish automatically: release version 1.3.0 only after Jeremy explicitly directs it. If Apple requests changes or rejects the build, create a new bounded remediation task with the exact App Store Connect feedback.
 
-## Approval gate — do not cross
+## Reference
 
-Do **not** submit the app for App Review, enable external TestFlight distribution, change pricing/IAP products, or alter public-facing store copy/screenshots without reporting the proposed change and getting Jeremy's approval.
-
-## Deliverable
-
-Return a concise SITREP:
-- build processing status and TestFlight readiness;
-- exact changes made in App Store Connect;
-- blockers requiring Jeremy action;
-- remaining checklist items before App Review;
-- direct App Store Connect URLs/screens/pages where possible.
-
-Do not edit application source code, git history, native signing settings, or deployment workflows.
+Use [`../../RELEASE_CHECKLIST.md`](../../RELEASE_CHECKLIST.md) for the next App Store update.
