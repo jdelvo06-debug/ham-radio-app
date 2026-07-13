@@ -1,56 +1,55 @@
-# Project Status
+# Project Status — Ham Radio Study Buddy
 
-## Overview
-- **Project Name**: Ham Radio Study App
-- **Status**: Active, iOS/App Store push in progress
-- **Last Updated**: 2026-04-20
-- **Port**: 4000
-- **Deployment**: PM2 (local) + PWA + Capacitor iOS build
+**Last updated:** 2026-07-12
+**Release state:** App Store version **1.3.0 (3)** is **Waiting for Review**. Manual release is selected, so approval will not publish automatically.
 
-## Description
-A study app to help prepare for the FCC Amateur Radio Technician Class license exam with lessons, quizzes, analytics, progress tracking, and an in-progress premium unlock for unlimited access.
+## Product state
 
-## Current Focus
-Finish the first iOS/App Store release for **Ham Radio Study Buddy**.
+- The app is already published on the App Store.
+- The current update completes the five-phase quality remediation recorded in [`ROADMAP.md`](ROADMAP.md).
+- App Store Connect / Apple Developer work was completed by Codex after the engineering QA and archive upload.
+- The next human action is to decide when to release after Apple approves the update.
 
-## Current State
-- App Store Connect app exists for bundle ID `com.studybuddy.hamradio`
-- First non-consumable IAP exists: `com.studybuddy.hamradio.premium`
-- Freemium gating is wired in app code
-- Real StoreKit 2 purchase flow is wired with `@capgo/native-purchases`
-- Local StoreKit simulator purchase test succeeded and premium unlocked
-- Restore flow was flaky in simulator and still needs better validation
-- Xcode signing/archive issues were resolved enough to create and upload an archive
-- Archive upload to App Store Connect completed on 2026-04-20
+## Verified engineering state
 
-## To-Do List
-- [x] Set up PM2 for persistent server
-- [x] Add PWA support (manifest, service worker, icons)
-- [x] Install as app on phone via Chrome
-- [x] Create App Store Connect app
-- [x] Create first IAP product
-- [x] Wire StoreKit purchase flow and test simulator purchase
-- [x] Archive and upload first iOS build to App Store Connect
-- [ ] Wait for build processing in App Store Connect / TestFlight
-- [ ] Attach the IAP to the app version/submission as required
-- [ ] Validate restore-purchase behavior outside flaky local simulator conditions
-- [ ] Finish App Store / TestFlight submission flow
+| Gate | Current result |
+|---|---|
+| FCC content | Corrected 2026–2030 pool: 409 IDs and answer keys match the official source |
+| Practice exam | Official 35-group NCVEC blueprint |
+| Figure questions | 12 official figure references rendered from T-1/T-2/T-3 assets |
+| App tests | Vitest baseline covers pool/exam integrity, imports, persistence, entitlement logic, navigation, and accessibility regressions |
+| Static build | `npm run build` passes |
+| Static browser smoke | `npm run smoke:static` passes |
+| GitHub Actions | Web build/smoke and Android Gradle test/lint passed on the release-verification workflow |
+| iOS release artifact | Store-signed `1.3.0 (3)` uploaded and submitted to App Store review |
 
-## Recommended Next Steps
-1. Open App Store Connect and confirm the uploaded build finishes processing
-2. Complete TestFlight/App Review metadata for the first iOS build
-3. Attach `com.studybuddy.hamradio.premium` to the app submission
-4. Sanity-check restore purchases in a less flaky environment before final release
+## Architecture that remains intentional
 
-## Recent Accomplishments
-- App now supports a premium unlock path for unlimited questions/quizzes/lessons/bookmarks
-- StoreKit config file added for local iOS purchase testing
-- Simulator purchase flow succeeded end-to-end
-- Apple Developer membership/device/profile issues were untangled enough to archive successfully
-- First archive uploaded to App Store Connect
+- Static export with `output: 'export'`
+- Offline-first study data; no account, backend, tracking, or analytics service
+- Capacitor iOS/Android shells
+- Local progress, bookmarks, review state, and exports
+- Dark-first interface; incomplete light mode was intentionally removed rather than shipped half-working
 
-## Notes
-- Main app lives in `my-study-app/`
-- iOS project lives in `my-study-app/ios/App/`
-- Progress is still saved locally for many app features; premium status uses native purchase flow with local cache
-- Question pool valid 2026-2030 in current app content
+## Current release configuration
+
+- Bundle ID: `com.studybuddy.hamradio`
+- Premium product: `com.studybuddy.hamradio.premium` (non-consumable)
+- Marketing version: `1.3.0`
+- App Store build under review: `3`
+- Release setting: manual
+
+## Follow-up after Apple review
+
+1. Read Apple’s review email and resolve any rejection or metadata request.
+2. If approved, decide whether to release version 1.3.0 immediately.
+3. Run a post-release smoke on the live App Store build, including launch, Study Mode, official exam composition, figures, Premium restore, and the new app icon.
+4. Record the published version/date in this file and reset [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the next update.
+
+## Maintenance notes
+
+- Use native ARM Node (`/opt/homebrew/bin`) on this Apple Silicon Mac for Vitest, lightningcss, and other native-module tooling.
+- `npm run build:mobile` builds the static export and synchronizes Capacitor. Do not run `next export` separately.
+- `npm start` serves `out/`; `next start` is incompatible with the static-export contract.
+- Local Android Gradle verification needs JDK 21 plus Android SDK configuration. GitHub Actions provides both and is the authoritative Android gate today.
+- Do not restore the obsolete full-app GitHub Pages workflow; it is not a release target.

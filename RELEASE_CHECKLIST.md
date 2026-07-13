@@ -1,106 +1,64 @@
 # Ham Radio Study Buddy App Store Update Checklist
 
-Use this checklist for the next App Store update. Repository verification does
-not prove that App Store Connect metadata is current, a TestFlight build was
-tested, or a version was submitted.
+Use this reusable checklist for the **next** App Store update.
+
+## Current release snapshot
+
+| Item | Status |
+|---|---|
+| Version/build | 1.3.0 (3) |
+| App Store Connect | Waiting for Review |
+| Release control | Manual — approval will not publish automatically |
+| Engineering CI | Web smoke and Android Gradle/lint passed |
+| App Store artifact | Distribution-signed IPA uploaded successfully |
+
+For the current submission, wait for Apple’s review email. After approval, release only when Jeremy explicitly directs it.
+
+---
 
 ## 1. Version, build, and archive
 
-- [ ] Choose the release version and increment the iOS build number.
-- [ ] Confirm the version is synchronized in `my-study-app/package.json`,
-      `my-study-app/app/types.ts`, the iOS Xcode project, and Android Gradle.
-- [ ] Run `npm ci`, `npm run lint`, `npm test`, `npm run build`, and
-      `npm run smoke:static` from `my-study-app/`.
+- [ ] Choose marketing version and increment the appropriate native build counter.
+- [ ] Confirm package, UI, iOS, and Android versioning is intentional; native build counters may differ by platform.
+- [ ] Run `npm ci`, `npm run lint`, `npm test`, `npm run build`, and `npm run smoke:static` from `my-study-app/`.
 - [ ] Run `npm run build:mobile` and confirm Capacitor sync completes.
 - [ ] Archive the Release scheme with the intended signing team/profile.
-- [ ] Validate the archive and resolve every Xcode/App Store Connect warning,
-      including required-reason API and third-party SDK privacy-manifest warnings.
-- [ ] Confirm the archive contains the expected app icon, launch assets, bundle
-      identifier `com.studybuddy.hamradio`, version, and build number.
+- [ ] Confirm the export uses an App Store distribution profile (`get-task-allow = false`).
+- [ ] Confirm expected icon, launch assets, bundle ID `com.studybuddy.hamradio`, marketing version, and build number.
 
 ## 2. Screenshots and metadata
 
-- [ ] Capture fresh screenshots from the release candidate, not an older build.
-- [ ] Cover every App Store Connect device size currently required for iPhone
-      and iPad platforms enabled by the app.
-- [ ] Ensure screenshots show current dark-only UI and do not promise features
-      outside the selected free/premium tier.
-- [ ] Review app name, subtitle, promotional text, description, keywords,
-      category, copyright, and release notes.
-- [ ] Confirm the support URL loads and describes the current app/version.
-- [ ] Publish `docs/privacy/index.html` to the Privacy Policy URL and confirm the
-      public page shows the July 12, 2026 update before submission. The former
-      full-app GitHub Pages deployment workflow has been removed.
-- [ ] Confirm all metadata URLs use HTTPS and load without authentication.
+- [ ] Capture fresh screenshots from the release candidate.
+- [ ] Cover App Store Connect device sizes enabled by the app.
+- [ ] Ensure screenshots show the current dark-first UI and truthful free/Premium features.
+- [ ] Review name, subtitle, promotional text, description, keywords, category, copyright, and release notes.
+- [ ] Confirm support and privacy URLs are HTTPS, public, and current.
 
-## 3. Age rating and content rights
+## 3. Privacy and content
 
-- [ ] Re-answer the current age-rating questionnaire in App Store Connect.
-- [ ] Confirm there is no user-generated content, chat, advertising, gambling,
-      unrestricted web access, or social networking in this version.
-- [ ] Confirm educational-content answers match the app's actual FCC exam-prep
-      content and external links.
-- [ ] Confirm the bundled 2026-2030 Technician question pool and figures are
-      permitted for distribution and the FCC/ARRL non-affiliation copy is visible.
+- [ ] Recheck App Store privacy: no account, backend, tracking, ad SDK, or analytics SDK.
+- [ ] Confirm progress, bookmarks, lessons, streaks, review schedules, and preferences remain local unless the user exports a file.
+- [ ] Confirm Apple purchase language is accurate and Google Play Billing language is only included if Android distribution remains planned.
+- [ ] Re-answer age rating and confirm no UGC, chat, ads, gambling, unrestricted web access, or social networking.
+- [ ] Confirm the 2026–2030 Technician pool and official figures remain permitted for distribution and FCC/ARRL non-affiliation copy is visible.
 
-## 4. Privacy answers
+## 4. Premium and TestFlight
 
-- [ ] Verify the release candidate still has no account requirement, backend,
-      tracking, advertising SDK, or third-party analytics SDK.
-- [ ] Confirm study progress, bookmarks, lessons, streaks, review schedules,
-      and preferences remain local to the device unless the user exports a file.
-- [ ] Set App Store Connect App Privacy to **Data Not Collected** only after
-      checking the final archive and every bundled third-party SDK.
-- [ ] Set tracking to **No**; the app does not perform cross-app or cross-site tracking.
-- [ ] Confirm the in-app Settings privacy copy and public privacy policy match
-      the App Store Connect answers.
-- [ ] Confirm purchase wording is accurate: Apple processes iOS payments and
-      Google Play Billing processes intended Android payments; the developer
-      does not receive payment-card or bank-account details.
-- [ ] Recheck privacy answers if any SDK, logging, analytics, crash reporting,
-      account, or backend capability is added after this checklist is approved.
+- [ ] Confirm `com.studybuddy.hamradio.premium` is cleared for sale and attached to the version if required.
+- [ ] Test purchase, cancellation, pending purchase, relaunch entitlement, reinstall, and Restore Purchase on a physical TestFlight device.
+- [ ] Test clean install and upgrade from the current App Store version.
+- [ ] Smoke launch, onboarding, Study Mode, Practice Exam composition, figures, lessons, bookmarks, Review, analytics, Settings, export/import/reset, offline relaunch, rotation, VoiceOver, and Dynamic Type.
+- [ ] Record tester/build/device/retest evidence and obtain explicit beta sign-off.
 
-## 5. Premium purchase review risks
+## 5. Submit and release
 
-- [ ] Confirm `com.studybuddy.hamradio.premium` is the correct non-consumable
-      product, cleared for sale, and attached to the submitted app version when required.
-- [ ] Test purchase, cancellation, pending purchase handling, relaunch entitlement,
-      reinstall, and Restore Purchase using Apple sandbox/TestFlight accounts.
-- [ ] Resolve the previously observed flaky Restore Purchase behavior or document
-      reproducible evidence that the release candidate restores reliably.
-- [ ] Confirm a free user can launch and use basic Study Mode without an account,
-      purchase, reviewer code, or external setup.
-- [ ] Put concise purchase and restore instructions in App Review notes.
+- [ ] Complete export-compliance and any App Store Connect warnings.
+- [ ] Add review notes: no account required, local/offline study data, basic free Study Mode, and Premium/Restore steps.
+- [ ] Select the signed-off build and confirm every App Store Connect section is complete.
+- [ ] Submit only with explicit approval.
+- [ ] If manual release is selected, publish only after explicit approval following Apple acceptance.
 
-## 6. TestFlight beta round
+## 6. Android follow-up
 
-- [ ] Upload the validated archive and wait for App Store Connect processing.
-- [ ] Complete export-compliance questions and any missing compliance documents.
-- [ ] Run at least one internal TestFlight round on a clean install and an upgrade
-      from the current App Store version.
-- [ ] Test launch, onboarding, Study Mode question transition, Practice Exam
-      composition, lessons, bookmarks, review mode, analytics, Settings, export,
-      import, reset, offline relaunch, and device rotation/resizing where supported.
-- [ ] Test VoiceOver labels/focus and Dynamic Type at representative sizes.
-- [ ] Test purchase and restore on a physical device through TestFlight.
-- [ ] Record tester names/devices, build number, defects, and retest results.
-- [ ] Obtain explicit beta sign-off before selecting the build for review.
-
-## 7. Submission and review notes
-
-- [ ] Select the signed-off build and verify all App Store Connect sections are complete.
-- [ ] Explain in Review Notes that no account is required, basic Study Mode is
-      available free, and Premium is a non-consumable in-app purchase.
-- [ ] Give the reviewer exact steps to reach purchase and Restore Purchase controls.
-- [ ] Mention that study data is stored locally and the app works offline after install.
-- [ ] Confirm no placeholder URLs, stale version references, debug menus, test
-      products, or simulator-only configuration remain in the submitted archive.
-- [ ] Submit manually only after privacy, metadata, purchase, TestFlight, and
-      archive gates above are signed off.
-
-## 8. Android follow-up (not an iOS submission gate)
-
-- [ ] Run `npm run verify:android` on a host with JDK 21 and an Android SDK.
-- [ ] Confirm Gradle unit tests and Android lint pass in GitHub Actions.
-- [ ] Before any Google Play submission, recheck the Play Console Data safety
-      answers and verify Google Play Billing purchase/restore behavior on device.
+- [ ] Verify `npm run verify:android` with JDK 21 and Android SDK, or rely on the passing GitHub Actions gate.
+- [ ] Before Google Play submission, recheck Play Console Data Safety and device purchase/restore behavior.

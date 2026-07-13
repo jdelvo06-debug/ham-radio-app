@@ -1,283 +1,108 @@
-# Ham Radio Technician Exam Study App
+# Ham Radio Study Buddy — Project Notes
 
-## Overview
-A web-based study application for the FCC Amateur Radio Technician Class license exam. Provides guided learning with topic-based lessons, multiple study modes, progress tracking, and analytics.
+## Purpose and release posture
 
-## Tech Stack
-- **Framework:** Next.js 16.0.10 with App Router
-- **UI:** React 19.2.1 + TypeScript
-- **Styling:** Tailwind CSS 4
-- **Data Parsing:** Python 3 scripts for FCC question pool processing
+Ham Radio Study Buddy is an offline-first FCC Amateur Radio Technician study app. It is already published on the App Store; the current update is **version 1.3.0 (build 3), Waiting for Review**, with manual release selected.
 
-## Project Structure
+The primary delivery path is **static export → Capacitor → Xcode → App Store Connect**. The old full-app GitHub Pages deployment was intentionally removed.
+
+## Stack
+
+- Next.js **16.2.10** (App Router, static export)
+- React **19.2.1**, TypeScript, Tailwind CSS 4
+- Capacitor 8 for iOS/Android
+- `@ducanh2912/next-pwa` with webpack builds
+- `@capgo/native-purchases` for Premium
+- Vitest for app tests; Python `unittest` content-pipeline checks
+
+## Content contract
+
+- Corrected official **2026–2030 Technician pool**: **409 questions**.
+- Practice Exam selects exactly one question from each official NCVEC syllabus group (35 questions).
+- T0A10, T1C01, T5A05, and T7A09 reflect official errata.
+- T1E11-D, T1F08-D, T2C06-D, and T7B11-D are complete.
+- Twelve official figure-dependent questions use bundled T-1/T-2/T-3 assets.
+- `generate_complete_json.py` is the canonical generator. Do not resurrect deleted alternative parsers or `raw_questions.txt`.
+
+## Core paths
+
+```text
+my-study-app/
+├── app/page.tsx                    # Main state coordinator; edit surgically
+├── app/ham_radio_questions.json    # Bundled official pool
+├── app/utils/examBlueprint.ts       # Official 35-group selection
+├── app/utils/                       # Validation/persistence/entitlement utilities + tests
+├── app/components/QuestionFigure.tsx
+├── public/figures/                  # Official T-1/T-2/T-3 assets
+├── scripts/smoke-static.mjs
+├── scripts/verify-android.sh
+├── ios/App/
+└── android/
 ```
-ham-radio-app/
-├── my-study-app/              # Next.js application
-│   ├── app/
-│   │   ├── page.tsx           # Main app component (~1200 lines, monolithic)
-│   │   ├── ham_radio_questions.json  # 411 parsed questions
-│   │   ├── lessons.json       # 10 topic lessons with detailed content
-│   │   ├── layout.tsx         # Root layout
-│   │   └── globals.css        # Tailwind imports
-│   ├── public/                # Static assets
-│   └── package.json
-├── *.py                       # Python parsers (6 files)
-├── raw_questions.txt          # Source FCC question data
-└── .claude/                   # Claude Code configuration
-    ├── rules/                 # Coding rules
-    └── blueprints/            # Task templates
-```
 
-## Development
+## Development and verification
 
-### Local Development
+Run from `my-study-app/`:
+
 ```bash
-cd my-study-app
-npm run dev    # Starts on port 4000
+PATH="/opt/homebrew/bin:$PATH" npm ci
+PATH="/opt/homebrew/bin:$PATH" npm run dev
+PATH="/opt/homebrew/bin:$PATH" npm test
+PATH="/opt/homebrew/bin:$PATH" npm run lint
+PATH="/opt/homebrew/bin:$PATH" npm run build
+PATH="/opt/homebrew/bin:$PATH" npm run smoke:static
+PATH="/opt/homebrew/bin:$PATH" npm run build:mobile
 ```
 
-### Production (PM2)
-```bash
-cd my-study-app
-npm run build
-pm2 start ecosystem.config.js    # Starts on port 4000
-```
+### Apple Silicon Node pitfall
 
-### Mobile Build (Capacitor)
-```bash
-cd my-study-app
-npm run build:mobile    # Generates out/ for Capacitor
-npx cap sync
-```
+This host can default to `/usr/local/bin/node` under Rosetta. Native packages such as Vitest/rolldown and lightningcss then look for `darwin-x64` binaries and fail. Prefer `/opt/homebrew/bin` in `PATH` and verify `process.arch === 'arm64'`.
 
-### Key URLs
-- Development: http://localhost:4000
-- Production (PM2): http://localhost:4000
-- Network access: http://<your-ip>:4000
+### Static-export contract
 
-### PWA
-The app is installable as a PWA via Chrome "Add to Home Screen" when served in production mode (PM2).
+- `next.config.ts` uses `output: 'export'`.
+- `npm run build:mobile` runs `npm run build && cap sync`.
+- Do not run `next export` separately.
+- `next start` is incompatible with this architecture; `npm start` serves `out/`.
 
-## Application Modes
+## Testing
 
-### Learn Mode (NEW)
-- 10 topic-based lessons (T0-T9)
-- Each lesson has 5-6 sections with detailed content
-- Key facts highlighted for each section
-- Exam tips at end of each lesson
-- "Mark as Completed" tracking
-- Direct "Take Quiz" button to test on that topic
-- Progress bar showing completion status
+The app has a Vitest baseline covering:
 
-### Study Mode
-- All questions (or filtered by subelement)
-- Immediate feedback after each answer
-- Shows explanations
-- Tracks accuracy
+- official exam composition and 409-question integrity
+- import validation and persistence migration
+- Android entitlement conditions
+- primary navigation and analytics weak-area routing
+- onboarding/quiz/settings accessibility regression behavior
 
-### Exam Mode
-- 35 random questions (simulates real exam)
-- No immediate feedback
-- Pass threshold: 74% (26/35 correct)
-- Shows missed questions at end
-- "Retry Missed" feature
+The root `tests/test_content_pipeline.py` verifies official source parity, errata, figures, derived lesson counts, and generator consolidation.
 
-### Bookmarks Mode
-- Practice only bookmarked questions
-- Study-mode behavior (immediate feedback)
-- Persisted to localStorage
+## Accessibility and UX
 
-### Review Mode (Spaced Repetition)
-- Automatically resurfaces questions you've missed or need to review
-- Simple algorithm: get a question right 3 times in a row = mastered
-- Wrong answers reset the streak and make questions appear sooner
-- Review intervals increase with each correct answer (immediate → 1 hour → 1 day → 7 days)
-- Shows due count on main menu and per-topic in Learn section
-- Displays mastery progress during review sessions
-- Questions mastered (3 correct streak) no longer appear in reviews
+- Dark-first UI only; incomplete light mode was intentionally removed.
+- Onboarding has dialog semantics, focus control, Escape behavior, and named controls.
+- Quiz progress has semantic values; answer feedback uses live announcements.
+- Keep all future UI work keyboard and screen-reader conscious.
 
-## Data Model
+## Premium and privacy
 
-### Question Interface
-```typescript
-interface Question {
-  id: string;           // "T0A01", "T1B02", etc.
-  question: string;     // Question text
-  options: string[];    // 4 answer options
-  correctAnswer: string; // "A", "B", "C", or "D"
-  explanation: string;  // Why the answer is correct
-}
-```
+- Product ID: `com.studybuddy.hamradio.premium`.
+- Android grants entitlement only for verified `PURCHASED` and acknowledged transactions.
+- Native billing calls must not execute on web.
+- The app collects no study data, uses no account/backend/tracking/analytics service, and keeps progress locally.
+- Privacy/support source pages live in `docs/privacy/index.html` and `docs/support/index.html`.
 
-### Lesson Interface
-```typescript
-interface LessonSection {
-  title: string;        // Section heading
-  content: string;      // Explanatory text
-  keyFacts: string[];   // Bullet points of key facts
-}
+## Release rules
 
-interface Lesson {
-  id: string;           // "T0", "T1", etc.
-  title: string;        // "Safety", "FCC Rules", etc.
-  subtitle: string;     // Brief description
-  icon: string;         // Emoji icon
-  estimatedMinutes: number;  // Reading time (~5 min each)
-  sections: LessonSection[];  // 5-6 sections per lesson
-  examTip: string;      // Key exam tip
-  questionCount: number; // Questions in this topic
-}
-```
+- `RELEASE_CHECKLIST.md` is the release authority.
+- GitHub Actions workflow `release-verification.yml` runs web lint/tests/build/smoke plus Android Gradle test/lint with JDK 21.
+- Local Android Gradle execution needs JDK 21 and an Android SDK; CI is the current authoritative Android gate.
+- Do not modify App Store metadata, IAP products/pricing, external TestFlight, App Review submission, or manual release without Jeremy’s explicit direction.
 
-### Spaced Repetition Interface
-```typescript
-interface SpacedRepData {
-  questionId: string;
-  correctStreak: number;      // 0-3 (3 = mastered)
-  lastAnswered: number;       // timestamp
-  nextReviewDate: number;     // timestamp when due
-  timesAnswered: number;      // total attempts
-  timesCorrect: number;       // total correct
-}
-```
+## Do not regress
 
-### Streak Interface
-```typescript
-interface StreakData {
-  currentStreak: number;      // Current consecutive days
-  longestStreak: number;      // Best streak ever
-  lastStudyDate: string;      // YYYY-MM-DD format
-  totalStudyDays: number;     // Total days studied
-}
-```
-
-### Subelements
-Questions and lessons are organized by FCC subelements (T0-T9):
-- T0: Safety (Electrical, Antenna & RF Hazards)
-- T1: FCC Rules (Licensing, Privileges & Regulations)
-- T2: Operating Procedures (Repeaters, Nets & Emergency Comms)
-- T3: Radio Wave Propagation (How Signals Travel)
-- T4: Amateur Radio Practices (Station Setup & Controls)
-- T5: Electrical Principles (Ohm's Law, Power & Math)
-- T6: Electronic Components (Resistors, Capacitors, Semiconductors)
-- T7: Practical Circuits (Equipment & Troubleshooting)
-- T8: Signals & Emissions (Modulation, Digital & Satellites)
-- T9: Antennas & Feed Lines (Antenna Types, Coax & Connectors)
-
-## FCC Exam Facts
-- 35 questions from a pool of 411
-- 74% passing score (26 correct)
-- Questions rotate every 4 years
-- Current pool: 2022-2026
-
-## Key Files
-| File | Purpose |
-|------|---------|
-| `my-study-app/app/page.tsx` | Main app logic (~2030 lines, all UI + state) |
-| `my-study-app/app/ham_radio_questions.json` | 411 parsed questions |
-| `my-study-app/app/lessons.json` | 10 detailed topic lessons |
-| `generate_complete_json.py` | Primary question parser |
-| `build_questions_json.py` | Alternative parser with different approach |
-
-## App States
-The app uses a state machine pattern with these states:
-- `menu` - Main menu with mode selection
-- `learn` - Topic list view (10 lessons)
-- `lesson` - Individual lesson view with sections
-- `quiz` - Question display and answering
-- `results` - Score and performance breakdown
-- `analytics` - Global statistics dashboard
-- `settings` - App settings (dark mode, reset progress, about)
-
-## localStorage Keys
-- `ham_technician_bookmarks` - Array of bookmarked question IDs
-- `ham_technician_global_stats` - Per-subelement accuracy stats
-- `ham_technician_completed_lessons` - Array of completed lesson IDs
-- `ham_technician_spaced_rep` - Spaced repetition data per question
-- `ham_technician_dark_mode` - Dark mode preference (boolean)
-- `ham_technician_streak` - Study streak and passed exams data
-- `ham_technician_onboarding_complete` - Whether user has seen onboarding
-
-## Spaced Repetition Algorithm
-Simple system based on correct answer streaks:
-- **Streak 0 (wrong):** Review immediately available
-- **Streak 1:** Review after 1 hour
-- **Streak 2:** Review after 1 day
-- **Streak 3 (mastered):** Review after 7 days, removed from active reviews
-
-Getting a question wrong resets the streak to 0.
-
-## Settings Page
-The app includes a Settings page with:
-- **Dark Mode toggle** - Switches between light and dark themes (persisted)
-- **Progress Summary** - Shows questions answered, accuracy, lessons completed, bookmarks, mastered count
-- **Export/Import** - Backup and restore all progress as JSON file
-- **Achievements Gallery** - Grid display of all 15 badges with earned/locked status
-- **Reset All Progress** - Clears all data with confirmation dialog
-- **About Section** - Version number, FCC attribution, disclaimer, replay tutorial button
-
-## Onboarding Tutorial
-First-time users see a 4-slide swipe-through tutorial:
-1. **Welcome** - Introduction and exam overview
-2. **Learn, Then Practice** - Explains the study workflow
-3. **Smart Review System** - Describes spaced repetition
-4. **Track Your Progress** - Highlights streaks and badges
-
-Features:
-- Shown automatically on first launch
-- Skip button available on first slide
-- Progress dots for navigation
-- "Replay Tutorial" button in Settings > About
-
-## Study Streaks & Badges
-Gamification features to encourage daily study:
-
-### Streak Tracking
-- **Current Streak** - Consecutive days of study
-- **Longest Streak** - Personal best streak ever achieved
-- **Total Study Days** - Lifetime count of days studied
-- Streak updates when user answers any question
-- Displayed prominently on main menu
-
-### Badge System
-15 achievements across multiple categories:
-- **Questions**: First Steps (1), Getting Started (10), Dedicated Learner (50), Century Club (100)
-- **Streaks**: On a Roll (3 days), Week Warrior (7), Two Week Champ (14), Monthly Master (30)
-- **Lessons**: Student (1 complete), Scholar (all 10 complete)
-- **Mastery**: Memory Pro (1), Review Expert (10), Knowledge Keeper (50)
-- **Exams**: Exam Ready (pass 1), Test Veteran (pass 5)
-
-Badge progress shown on main menu and full gallery in Settings.
-
-## Dark Mode
-All pages support dark mode:
-- Toggle available in Settings
-- Preference saved to localStorage
-- Consistent slate-900 dark backgrounds
-- All UI elements styled for both modes
-
-## Current Limitations
-- **Monolithic architecture:** All ~2030 lines in single `page.tsx`
-- **No tests:** Zero test coverage
-- **No component library:** Everything is inline Tailwind
-- **Client-side only:** No server components or API routes
-
-## Analytics & Weak Areas
-The Analytics page includes intelligent weak areas analysis:
-- **Weak Areas (red)** - Topics below 74% passing threshold, sorted weakest first
-- **Strong Areas (green)** - Topics at or above 74%, sorted strongest first
-- **Need More Practice (amber)** - Topics with <5 questions answered
-- Requires 5+ questions per topic for meaningful accuracy insights
-- Quick "Study" buttons to jump directly to weak topics
-
-## Lesson Navigation
-Each lesson view includes Previous/Next buttons at the bottom:
-- Shows adjacent lesson titles (e.g., "T0: Safety" ← → "T2: Operating Procedures")
-- Disabled when at first/last lesson
-- Allows sequential reading without returning to topic list
-
-## Future Enhancement Ideas
-- Flashcard mode for key facts
-- Study streaks tracking
-- Push notifications for review reminders
-- Mobile app (App Store)
+- Static-export / offline-first architecture
+- Local-only study data model
+- Responsive mobile layout
+- Official pool and exam blueprint integrity
+- Truthful Premium behavior and restore path
