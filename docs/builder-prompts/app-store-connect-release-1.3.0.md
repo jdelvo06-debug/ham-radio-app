@@ -2,11 +2,11 @@
 
 **Original task:** take Ham Radio Study Buddy version 1.3.0 through App Store Connect/TestFlight preparation.
 
-## Final status — 2026-07-12
+## Final status — 2026-07-13
 
 - Submitted candidate: **1.3.0 (3)**
-- App Store Connect status: **Waiting for Review**
-- Release control: **manual**
+- App Store Connect status: **Released**
+- Release control: manual release completed
 - Engineering release CI: web smoke and Android Gradle/lint passed
 
 This is a completed handoff record, not an active task prompt.

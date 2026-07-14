@@ -7,12 +7,12 @@ Use this reusable checklist for the **next** App Store update.
 | Item | Status |
 |---|---|
 | Version/build | 1.3.0 (3) |
-| App Store Connect | Waiting for Review |
-| Release control | Manual — approval will not publish automatically |
+| App Store Connect | Released |
+| Release control | Manual release completed |
 | Engineering CI | Web smoke and Android Gradle/lint passed |
 | App Store artifact | Distribution-signed IPA uploaded successfully |
 
-For the current submission, wait for Apple’s review email. After approval, release only when Jeremy explicitly directs it.
+For the current submission, the update is live. Start the next release cycle from the sections below.
 
 ---
 

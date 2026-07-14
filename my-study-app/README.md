@@ -4,7 +4,7 @@ Next.js + Capacitor study app for the official FCC Amateur Radio Technician exam
 
 ## Current release
 
-- **App Store:** version **1.3.0 (3)** is **Waiting for Review** with manual release selected.
+- **App Store:** version **1.3.0 (3)** is live (released 2026-07-13 EDT).
 - **Pool:** corrected official 2026–2030 Technician pool, **409 questions**.
 - **Practice exams:** one question from each official NCVEC syllabus group (35 total).
 - **Data:** local-only study data; no account, tracking, ads, or analytics service.

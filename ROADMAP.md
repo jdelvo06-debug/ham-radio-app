@@ -2,7 +2,7 @@
 
 **Created:** 2026-07-11
 **Updated:** 2026-07-12
-**Result:** All five engineering/release-preparation phases are complete. App Store version **1.3.0 (3)** is **Waiting for Review** with manual release selected.
+**Result:** All five engineering/release-preparation phases are complete. App Store version **1.3.0 (3)** was approved and released on 2026-07-13 EDT.
 
 > The App Store / Capacitor route is primary. The old GitHub Pages deployment was removed and is not a release target.
 
@@ -61,9 +61,9 @@
 | Item | State |
 |---|---|
 | Candidate | 1.3.0 (3) |
-| App Store Connect | Waiting for Review |
-| Release control | Manual |
-| Next decision | Release after Apple approval, or resolve any review feedback |
+| App Store Connect | Released |
+| Release control | Manual release completed |
+| Next decision | Post-release device smoke and monitor user feedback |
 
 ## Preserve
 

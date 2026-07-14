@@ -4,7 +4,7 @@ An offline-first study app for the **FCC Amateur Radio Technician** exam. It run
 
 ## Current release
 
-- **App Store status:** version **1.3.0 (build 3)** is **Waiting for Review** with manual release selected.
+- **App Store status:** version **1.3.0 (build 3)** is live on the App Store (released 2026-07-13 EDT).
 - **Primary release path:** Capacitor → Xcode → App Store Connect. GitHub Pages is not an app release target.
 - **Question pool:** corrected official **2026–2030** Technician pool, **409 questions**.
 - **Exam realism:** each 35-question practice exam selects one question from every official NCVEC syllabus group.

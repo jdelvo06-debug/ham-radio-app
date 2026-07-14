@@ -2,7 +2,7 @@
 
 ## Purpose and release posture
 
-Ham Radio Study Buddy is an offline-first FCC Amateur Radio Technician study app. It is already published on the App Store; the current update is **version 1.3.0 (build 3), Waiting for Review**, with manual release selected.
+Ham Radio Study Buddy is an offline-first FCC Amateur Radio Technician study app. Version **1.3.0 (build 3)** is live on the App Store as of 2026-07-13 EDT.
 
 The primary delivery path is **static export → Capacitor → Xcode → App Store Connect**. The old full-app GitHub Pages deployment was intentionally removed.
 

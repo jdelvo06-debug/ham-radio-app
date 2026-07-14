@@ -85,7 +85,7 @@ GitHub Actions provides the Android JDK 21/SDK environment. On CI, run `npm run 
 
 ## App Store operations
 
-- Current candidate: version 1.3.0, build 3, Waiting for Review with manual release.
+- Version 1.3.0, build 3 was approved and released on 2026-07-13 EDT.
 - Archive export should use an App Store distribution profile (`get-task-allow = false`).
 - A Development-signed archive can be exported/re-signed for App Store Connect with the App Store export method; do not manually override automatic signing identity during archive.
 - Use `RELEASE_CHECKLIST.md` for each update. Do not claim release completion until App Store Connect status confirms it.

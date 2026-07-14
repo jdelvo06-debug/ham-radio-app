@@ -1,14 +1,14 @@
 # Project Status — Ham Radio Study Buddy
 
-**Last updated:** 2026-07-12
-**Release state:** App Store version **1.3.0 (3)** is **Waiting for Review**. Manual release is selected, so approval will not publish automatically.
+**Last updated:** 2026-07-13
+**Release state:** App Store version **1.3.0 (3)** is live. Apple approved the update and the manual release was completed.
 
 ## Product state
 
 - The app is already published on the App Store.
 - The current update completes the five-phase quality remediation recorded in [`ROADMAP.md`](ROADMAP.md).
 - App Store Connect / Apple Developer work was completed by Codex after the engineering QA and archive upload.
-- The next human action is to decide when to release after Apple approves the update.
+- Apple approved version 1.3.0 and the manual release was completed; the update is live.
 
 ## Verified engineering state
 
@@ -36,15 +36,15 @@
 - Bundle ID: `com.studybuddy.hamradio`
 - Premium product: `com.studybuddy.hamradio.premium` (non-consumable)
 - Marketing version: `1.3.0`
-- App Store build under review: `3`
-- Release setting: manual
+- Released App Store build: `3`
+- Release setting: manual release completed
 
-## Follow-up after Apple review
+## Follow-up after release
 
-1. Read Apple’s review email and resolve any rejection or metadata request.
-2. If approved, decide whether to release version 1.3.0 immediately.
-3. Run a post-release smoke on the live App Store build, including launch, Study Mode, official exam composition, figures, Premium restore, and the new app icon.
-4. Record the published version/date in this file and reset [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the next update.
+1. Run a post-release smoke on the live App Store build, including launch, Study Mode, official exam composition, figures, Premium restore, and the new app icon.
+2. Monitor App Store Connect for crash reports, reviews, and user feedback.
+3. Record material findings before starting the next release cycle.
+4. Reset [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the next update.
 
 ## Maintenance notes
 
